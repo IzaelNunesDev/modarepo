@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Moda Store - SaaS de Loja de Roupas
 
-## Getting Started
+Sistema SaaS completo para loja de roupas com vitrine de produtos, painel administrativo e checkout.
 
-First, run the development server:
+## 🎯 Funcionalidades
+
+### Loja (Cliente)
+- ✅ Listagem de produtos com busca e filtros
+- ✅ Detalhes do produto com galeria de imagens
+- ✅ Seleção de tamanho e cor
+- ✅ Carrinho de compras
+- ✅ Checkout com múltiplas formas de pagamento (PIX, Cartão, Boleto)
+
+### Admin
+- ✅ Dashboard com estatísticas
+- ✅ Adicionar produtos com upload de fotos
+- ✅ Controle de estoque por variação (tamanho/cor)
+
+## 🚀 Tecnologias
+
+- **Next.js 16** - Framework React Full Stack
+- **TypeScript** - Tipagem estática
+- **Tailwind CSS 4** - Estilização
+- **Node.js** - Backend (via API Routes do Next.js)
+
+## 📱 Mobile First
+
+Todo o sistema foi desenvolvido com foco em dispositivos móveis, garantindo uma experiência perfeita em smartphones.
+
+## 🛠️ Desenvolvimento Local
 
 ```bash
+# Instalar dependências
+npm install
+
+# Rodar em desenvolvimento
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Build de produção
+npm run build
+
+# Rodar produção localmente
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ☁️ Deploy no Render
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Configuração no Render
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Crie um novo **Web Service** no Render
+2. Conecte ao repositório GitHub
+3. Configure:
+   - **Build Command:** `npm install && npm run build`
+   - **Start Command:** `npm start`
+   - **Node Version:** `18` (ou superior)
 
-## Learn More
+### Variáveis de Ambiente (opcional)
+```
+PORT=3000
+NODE_ENV=production
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 📂 Estrutura do Projeto
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── app/                    # Páginas (App Router)
+│   ├── page.tsx           # Home (listagem de produtos)
+│   ├── produto/[id]/      # Detalhes do produto
+│   ├── carrinho/          # Carrinho de compras
+│   ├── checkout/          # Página de pagamento
+│   ├── conta/             # Conta do usuário
+│   └── admin/             # Painel administrativo
+│       ├── page.tsx       # Dashboard
+│       ├── produtos/novo/ # Adicionar produto
+│       └── estoque/       # Controle de estoque
+├── components/            # Componentes reutilizáveis
+├── data/                  # Dados mock
+└── types/                 # Definições TypeScript
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🎨 Design
 
-## Deploy on Vercel
+O design foi baseado nos protótipos HTML originais em `design_assets/`, seguindo:
+- Paleta de cores rosa/magenta
+- Fontes Manrope e Noto Sans
+- Componentes modernos e responsivos
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📝 Licença
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
