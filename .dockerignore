@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.gitignore
+*.md
+.agent
+design_assets
+imgs
+*.tar.gz
+*.pem
+*.log
+.env*
+server/node_modules
+server/dist
+server/.env
+.vscode
+.idea

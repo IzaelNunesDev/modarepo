@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { BottomNav } from '@/components/BottomNav';
 import { Header } from '@/components/Header';
 
 export default function ContaPage() {
@@ -19,7 +18,7 @@ export default function ContaPage() {
         <div className="min-h-screen bg-[var(--bg-primary)]">
             <Header title="Minha Conta" />
 
-            <main className="px-4 pb-24">
+            <main className="px-4 pb-32">
                 {/* User Profile Card */}
                 <div className="bg-gradient-to-r from-[var(--accent-pink)] to-[#ff6bb3] rounded-2xl p-4 mb-6 text-white">
                     <div className="flex items-center gap-4">
@@ -74,7 +73,6 @@ export default function ContaPage() {
                 </button>
             </main>
 
-            <BottomNav />
         </div>
     );
 }

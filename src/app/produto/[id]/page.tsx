@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, use } from 'react';
-import { BottomNav } from '@/components/BottomNav';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { mockProducts } from '@/data/products';
 import { ProductCard } from '@/components/ProductCard';
+import { useCart } from '@/contexts/CartContext';
 
 interface ProductPageProps {
     params: Promise<{ id: string }>;
@@ -31,6 +32,9 @@ export default function ProductPage({ params }: ProductPageProps) {
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [showAddedFeedback, setShowAddedFeedback] = useState(false);
+    const { addItem, totalItems } = useCart();
+    const router = useRouter();
 
     if (!product) {
         return (
@@ -52,8 +56,13 @@ export default function ProductPage({ params }: ProductPageProps) {
             alert('Por favor, selecione um tamanho e uma cor');
             return;
         }
-        // In real app, this would add to cart context/state
-        alert(`Adicionado ao carrinho: ${product.name} - ${selectedSize} - ${selectedColor}`);
+        addItem(product.id, selectedSize, selectedColor);
+        setShowAddedFeedback(true);
+        setTimeout(() => setShowAddedFeedback(false), 2500);
+    };
+
+    const handleGoToCart = () => {
+        router.push('/carrinho');
     };
 
     return (
@@ -76,7 +85,7 @@ export default function ProductPage({ params }: ProductPageProps) {
             </div>
 
             {/* Product Info */}
-            <div className="flex-1 px-4 pb-32">
+            <div className="flex-1 px-4 pb-48">
                 <h1 className="text-[var(--text-primary)] text-[22px] font-bold leading-tight tracking-tight pb-3 pt-2">
                     {product.name}
                 </h1>
@@ -95,8 +104,8 @@ export default function ProductPage({ params }: ProductPageProps) {
                             key={size}
                             onClick={() => setSelectedSize(size)}
                             className={`flex h-10 shrink-0 items-center justify-center rounded-lg px-4 transition-all ${selectedSize === size
-                                    ? 'bg-[var(--accent-pink)] text-white font-bold'
-                                    : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
+                                ? 'bg-[var(--accent-pink)] text-white font-bold'
+                                : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
                                 }`}
                         >
                             {size}
@@ -114,8 +123,8 @@ export default function ProductPage({ params }: ProductPageProps) {
                             key={color.name}
                             onClick={() => setSelectedColor(color.name)}
                             className={`size-10 rounded-full border-2 transition-all ${selectedColor === color.name
-                                    ? 'ring-2 ring-[var(--text-primary)] ring-offset-2'
-                                    : 'border-[var(--border-light)]'
+                                ? 'ring-2 ring-[var(--text-primary)] ring-offset-2'
+                                : 'border-[var(--border-light)]'
                                 }`}
                             style={{ backgroundColor: color.hex }}
                             title={color.name}
@@ -186,17 +195,28 @@ export default function ProductPage({ params }: ProductPageProps) {
                 )}
             </div>
 
-            {/* Fixed Bottom Bar */}
-            <div className="fixed bottom-0 left-0 right-0 bg-[var(--bg-primary)] border-t border-[var(--border-light)]">
-                <div className="px-4 py-3">
-                    <button
-                        onClick={handleAddToCart}
-                        className="w-full h-12 bg-[var(--accent-pink)] text-white text-base font-bold rounded-lg transition-all hover:opacity-90 active:scale-[0.98]"
-                    >
-                        Adicionar ao Carrinho
-                    </button>
+            {/* Fixed Bottom Bar - Floating "Island" Style above Nav */}
+            <div className="fixed bottom-24 left-4 right-4 z-[60] bg-white/90 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-3xl p-4">
+                <div className="flex items-center justify-between gap-4">
+                    {showAddedFeedback ? (
+                        <button
+                            onClick={handleGoToCart}
+                            className="w-full h-12 bg-green-500 text-white text-base font-bold rounded-xl transition-all hover:opacity-90 flex items-center justify-center gap-2 shadow-lg shadow-green-200"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                                <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" />
+                            </svg>
+                            Adicionado! Ver Sacola
+                        </button>
+                    ) : (
+                        <button
+                            onClick={handleAddToCart}
+                            className="w-full h-12 bg-[var(--text-primary)] text-white text-sm font-bold tracking-widest uppercase rounded-xl transition-all hover:opacity-90 active:scale-[0.98] shadow-lg shadow-gray-200"
+                        >
+                            Adicionar à Sacola
+                        </button>
+                    )}
                 </div>
-                <div className="h-5 bg-[var(--bg-primary)]" />
             </div>
         </div>
     );

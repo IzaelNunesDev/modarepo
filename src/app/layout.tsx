@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { CartProviderWrapper } from "@/components/CartProviderWrapper";
+import { BottomNav } from "@/components/BottomNav";
 
 export const metadata: Metadata = {
   title: "Moda Store - Loja de Roupas",
@@ -31,7 +33,10 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        {children}
+        <CartProviderWrapper>
+          {children}
+          <BottomNav />
+        </CartProviderWrapper>
       </body>
     </html>
   );

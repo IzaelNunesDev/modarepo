@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useCart } from '@/contexts/CartContext';
 
 interface NavItem {
     href: string;
@@ -65,16 +66,18 @@ const navItems: NavItem[] = [
     { href: '/conta', label: 'Conta', icon: <UserIcon />, iconActive: <UserIconFill /> },
 ];
 
-interface BottomNavProps {
-    cartCount?: number;
-}
-
-export function BottomNav({ cartCount = 0 }: BottomNavProps) {
+export function BottomNav() {
     const pathname = usePathname();
+    const { totalItems } = useCart();
+
+    // Don't show on admin pages or checkout
+    if (pathname.startsWith('/admin') || pathname.startsWith('/checkout')) {
+        return null;
+    }
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--bg-primary)] border-t border-[var(--border-light)]">
-            <div className="flex justify-around items-center px-4 pb-3 pt-2 max-w-lg mx-auto">
+        <nav className="fixed bottom-4 left-4 right-4 z-[9999]">
+            <div className="glass backdrop-blur-2xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] rounded-2xl flex justify-around items-center px-2 py-3 max-w-lg mx-auto bg-white/60 dark:bg-black/40">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href ||
                         (item.href !== '/' && pathname.startsWith(item.href));
@@ -83,24 +86,26 @@ export function BottomNav({ cartCount = 0 }: BottomNavProps) {
                         <Link
                             key={item.href}
                             href={item.href}
-                            className={`flex flex-col items-center justify-center gap-1 min-w-[64px] py-1 transition-colors ${isActive ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'
+                            className={`group flex flex-col items-center justify-center gap-1 min-w-[64px] rounded-xl p-1 transition-all duration-300 ${isActive ? 'text-[var(--accent-pink)] scale-105' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/40'
                                 }`}
                         >
-                            <div className="relative flex h-8 items-center justify-center">
-                                {isActive ? item.iconActive : item.icon}
-                                {item.href === '/carrinho' && cartCount > 0 && (
-                                    <span className="absolute -top-1 -right-2 bg-[var(--accent-pink)] text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
-                                        {cartCount > 99 ? '99+' : cartCount}
+                            <div className="relative flex h-7 items-center justify-center">
+                                <div className={`transition-transform duration-300 ${isActive ? '-translate-y-1' : 'group-hover:-translate-y-0.5'}`}>
+                                    {isActive ? item.iconActive : item.icon}
+                                </div>
+                                {item.href === '/carrinho' && totalItems > 0 && (
+                                    <span className="absolute -top-1.5 -right-2 bg-[var(--accent-pink)] text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shadow-sm border border-white animate-in zoom-in spin-in-3 duration-300">
+                                        {totalItems > 99 ? '99+' : totalItems}
                                     </span>
                                 )}
                             </div>
-                            <span className="text-xs font-medium tracking-wide">{item.label}</span>
+                            <span className={`text-[10px] font-bold tracking-wide transition-all duration-300 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 h-0 overflow-hidden group-hover:opacity-100 group-hover:h-auto group-hover:translate-y-0'}`}>
+                                {item.label}
+                            </span>
                         </Link>
                     );
                 })}
             </div>
-            {/* Safe area spacer for iOS */}
-            <div className="h-[env(safe-area-inset-bottom)]" />
         </nav>
     );
 }

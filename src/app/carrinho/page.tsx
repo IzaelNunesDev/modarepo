@@ -1,126 +1,96 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { BottomNav } from '@/components/BottomNav';
 import { Header } from '@/components/Header';
-import { mockProducts } from '@/data/products';
-import { CartItem } from '@/types';
-
-// Mock cart items for demonstration
-const initialCartItems: CartItem[] = [
-    {
-        productId: '1',
-        product: mockProducts[0],
-        size: 'M',
-        color: 'Amarelo',
-        quantity: 1,
-    },
-    {
-        productId: '3',
-        product: mockProducts[2],
-        size: 'G',
-        color: 'Branco',
-        quantity: 2,
-    },
-];
+import { useCart } from '@/contexts/CartContext';
+import { Trash2, Minus, Plus, ShoppingBag } from 'lucide-react';
 
 export default function CarrinhoPage() {
-    const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems);
-
-    const updateQuantity = (index: number, delta: number) => {
-        setCartItems((prev) =>
-            prev.map((item, i) => {
-                if (i === index) {
-                    const newQuantity = Math.max(1, item.quantity + delta);
-                    return { ...item, quantity: newQuantity };
-                }
-                return item;
-            })
-        );
-    };
-
-    const removeItem = (index: number) => {
-        setCartItems((prev) => prev.filter((_, i) => i !== index));
-    };
-
-    const subtotal = cartItems.reduce(
-        (sum, item) => sum + item.product.price * item.quantity,
-        0
-    );
-    const shipping = subtotal > 200 ? 0 : 15.99;
-    const total = subtotal + shipping;
+    const { items, removeItem, updateQuantity, subtotal, shipping, total } = useCart();
 
     return (
         <div className="relative flex min-h-screen w-full flex-col bg-[var(--bg-primary)]">
-            <Header title="Carrinho" />
+            <Header title="Shopping Bag" />
 
-            <main className="flex-1 px-4 pb-48">
-                {cartItems.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 256 256" className="text-[var(--text-secondary)] mb-4">
-                            <path d="M222.14,58.87A8,8,0,0,0,216,56H54.68L49.79,29.14A16,16,0,0,0,34.05,16H16a8,8,0,0,0,0,16h18L59.56,172.29a24,24,0,0,0,5.33,11.27,28,28,0,1,0,44.4,8.44h45.42A27.75,27.75,0,0,0,152,204a28,28,0,1,0,28-28H83.17a8,8,0,0,1-7.87-6.57L72.13,152h116a24,24,0,0,0,23.61-19.71l12.16-66.86A8,8,0,0,0,222.14,58.87ZM96,204a12,12,0,1,1-12-12A12,12,0,0,1,96,204Zm96,0a12,12,0,1,1-12-12A12,12,0,0,1,192,204Zm4-74.57A8,8,0,0,1,188.1,136H69.22L57.59,72H206.41Z" />
-                        </svg>
-                        <p className="text-[var(--text-secondary)] text-lg font-medium">
-                            Seu carrinho está vazio
+            <main className="flex-1 px-5 pb-96 pt-2">
+                {items.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-32 text-center animate-in fade-in duration-700">
+                        <div className="w-24 h-24 bg-[var(--bg-secondary)] rounded-full flex items-center justify-center mb-6">
+                            <ShoppingBag className="w-10 h-10 text-[var(--text-secondary)] opacity-50" />
+                        </div>
+                        <h2 className="text-[var(--text-primary)] text-2xl font-light mb-2">
+                            Sua sacola está vazia
+                        </h2>
+                        <p className="text-[var(--text-secondary)] text-sm mb-8 max-w-[250px]">
+                            Descubra peças exclusivas para renovar seu guarda-roupa.
                         </p>
                         <Link
                             href="/"
-                            className="mt-4 px-6 py-3 bg-[var(--accent-pink)] text-white font-bold rounded-lg"
+                            className="px-8 py-3 bg-[var(--text-primary)] text-white text-sm font-medium tracking-wide rounded-full hover:opacity-90 transition-all shadow-lg shadow-gray-200"
                         >
-                            Continuar Comprando
+                            COMEÇAR A COMPRAR
                         </Link>
                     </div>
                 ) : (
-                    <div className="space-y-4 mt-4">
-                        {cartItems.map((item, index) => (
+                    <div className="space-y-8 mt-4">
+                        {items.map((item, index) => (
                             <div
                                 key={`${item.productId}-${item.size}-${item.color}`}
-                                className="flex gap-4 p-3 bg-white rounded-xl shadow-sm border border-[var(--border-light)]"
+                                className="group flex gap-5 py-2 animate-in slide-in-from-bottom-4 duration-500 fill-mode-backwards"
+                                style={{ animationDelay: `${index * 100}ms` }}
                             >
+                                {/* Product Image - Portrait Mode */}
                                 <div
-                                    className="w-20 h-20 bg-center bg-cover rounded-lg flex-shrink-0"
+                                    className="w-28 h-36 bg-center bg-cover rounded-md shadow-sm shrink-0 relative overflow-hidden"
                                     style={{ backgroundImage: `url("${item.product.images[0]}")` }}
-                                />
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="text-[var(--text-primary)] font-medium text-sm line-clamp-1">
-                                        {item.product.name}
-                                    </h3>
-                                    <p className="text-[var(--text-secondary)] text-xs mt-1">
-                                        {item.size} • {item.color}
-                                    </p>
-                                    <p className="text-[var(--text-primary)] font-bold text-sm mt-2">
-                                        R$ {item.product.price.toFixed(2).replace('.', ',')}
-                                    </p>
+                                >
+                                    <div className="absolute inset-0 bg-black/5 mix-blend-multiply" />
                                 </div>
-                                <div className="flex flex-col items-end justify-between">
-                                    <button
-                                        onClick={() => removeItem(index)}
-                                        className="text-[var(--text-secondary)] p-1"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
-                                            <path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z" />
-                                        </svg>
-                                    </button>
-                                    <div className="flex items-center gap-2">
+
+                                {/* Product Details */}
+                                <div className="flex-1 flex flex-col justify-between min-w-0 py-1">
+                                    <div>
+                                        <div className="flex justify-between items-start gap-2">
+                                            <h3 className="text-[var(--text-primary)] font-medium text-base leading-tight line-clamp-2">
+                                                {item.product.name}
+                                            </h3>
+                                        </div>
+                                        <div className="flex items-center gap-3 mt-2 text-xs text-[var(--text-secondary)] font-medium tracking-wide uppercase">
+                                            <span>{item.size}</span>
+                                            <span className="w-1 h-1 bg-current rounded-full opacity-30" />
+                                            <span>{item.color}</span>
+                                        </div>
+                                        <p className="text-[var(--text-primary)] font-semibold text-lg mt-2">
+                                            R$ {item.product.price.toFixed(2).replace('.', ',')}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center justify-between mt-auto pt-2">
+                                        {/* Minimal Quantity Selector */}
+                                        <div className="flex items-center gap-4 bg-white border border-[var(--border-light)] rounded-full px-1 py-1 shadow-sm">
+                                            <button
+                                                onClick={() => updateQuantity(index, -1)}
+                                                className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-50 text-[var(--text-secondary)] transition-colors"
+                                            >
+                                                <Minus size={14} />
+                                            </button>
+                                            <span className="w-4 text-center font-medium text-sm text-[var(--text-primary)]">
+                                                {item.quantity}
+                                            </span>
+                                            <button
+                                                onClick={() => updateQuantity(index, 1)}
+                                                className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-50 text-[var(--text-primary)] transition-colors"
+                                            >
+                                                <Plus size={14} />
+                                            </button>
+                                        </div>
+
                                         <button
-                                            onClick={() => updateQuantity(index, -1)}
-                                            className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center"
+                                            onClick={() => removeItem(index)}
+                                            className="text-[var(--text-secondary)] p-2 hover:text-red-500 transition-colors opacity-70 hover:opacity-100"
+                                            aria-label="Remover item"
                                         >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
-                                                <path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z" />
-                                            </svg>
-                                        </button>
-                                        <span className="text-[var(--text-primary)] font-medium w-6 text-center">
-                                            {item.quantity}
-                                        </span>
-                                        <button
-                                            onClick={() => updateQuantity(index, 1)}
-                                            className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
-                                                <path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z" />
-                                            </svg>
+                                            <Trash2 size={18} strokeWidth={1.5} />
                                         </button>
                                     </div>
                                 </div>
@@ -130,40 +100,50 @@ export default function CarrinhoPage() {
                 )}
             </main>
 
-            {/* Fixed Bottom Summary */}
-            {cartItems.length > 0 && (
-                <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[var(--border-light)] shadow-lg">
-                    <div className="px-4 py-4 space-y-2">
-                        <div className="flex justify-between text-sm">
-                            <span className="text-[var(--text-secondary)]">Subtotal</span>
-                            <span className="text-[var(--text-primary)]">
-                                R$ {subtotal.toFixed(2).replace('.', ',')}
-                            </span>
+            {/* Glassmorphism Bottom Summary - Floating "Island" Style above Nav */}
+            {items.length > 0 && (
+                <div className="fixed bottom-24 left-4 right-4 z-[60]">
+                    {/* Glass Effect Panel */}
+                    <div className="bg-white/90 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-3xl p-6">
+
+                        <div className="space-y-3 mb-6">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-[var(--text-secondary)]">Subtotal</span>
+                                <span className="font-medium text-[var(--text-primary)]">
+                                    R$ {subtotal.toFixed(2).replace('.', ',')}
+                                </span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-[var(--text-secondary)]">Entrega estimada</span>
+                                <span className={shipping === 0 ? 'text-[var(--accent-pink)] font-medium' : 'font-medium text-[var(--text-primary)]'}>
+                                    {shipping === 0 ? 'Grátis' : `R$ ${shipping.toFixed(2).replace('.', ',')}`}
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-baseline pt-4 border-t border-dashed border-[var(--border-light)]">
+                                <span className="text-base font-semibold text-[var(--text-primary)]">Total</span>
+                                <div className="text-right">
+                                    <span className="block text-2xl font-bold text-[var(--text-primary)] tracking-tight">
+                                        R$ {total.toFixed(2).replace('.', ',')}
+                                    </span>
+                                    <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-widest">
+                                        em até 3x sem juros
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex justify-between text-sm">
-                            <span className="text-[var(--text-secondary)]">Frete</span>
-                            <span className={shipping === 0 ? 'text-green-600 font-medium' : 'text-[var(--text-primary)]'}>
-                                {shipping === 0 ? 'Grátis' : `R$ ${shipping.toFixed(2).replace('.', ',')}`}
-                            </span>
-                        </div>
-                        <div className="flex justify-between text-lg font-bold pt-2 border-t border-[var(--border-light)]">
-                            <span className="text-[var(--text-primary)]">Total</span>
-                            <span className="text-[var(--accent-pink)]">
-                                R$ {total.toFixed(2).replace('.', ',')}
-                            </span>
-                        </div>
+
                         <Link
                             href="/checkout"
-                            className="block w-full py-3 bg-[var(--accent-pink)] text-white text-center font-bold rounded-lg mt-3 transition-all hover:opacity-90"
+                            className="group relative flex w-full items-center justify-center overflow-hidden rounded-xl bg-[var(--text-primary)] py-4 text-white shadow-xl transition-all active:scale-[0.98]"
                         >
-                            Finalizar Compra
+                            <span className="relative z-10 text-sm font-bold tracking-widest uppercase">
+                                Finalizar Pedido
+                            </span>
+                            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </Link>
                     </div>
-                    <div className="h-[env(safe-area-inset-bottom)]" />
                 </div>
             )}
-
-            <BottomNav cartCount={cartItems.length} />
         </div>
     );
 }
