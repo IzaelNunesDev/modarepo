@@ -24,6 +24,12 @@ echo "🏗️ Rebuildando containers (Docker Compose)..."
 # Usamos -d para rodar em background
 docker compose up -d --build
 
+# 4. Rodar Migrações do Banco de Dados
+echo "🗄️ Executando migrações do banco de dados (Prisma)..."
+# Aguarda o backend estar pronto (retry simples)
+sleep 10
+docker compose exec -T backend npx prisma db push
+
 # 4. Limpeza (opcional)
 echo "🧹 Limpando imagens antigas..."
 docker image prune -f
