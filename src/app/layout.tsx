@@ -1,7 +1,19 @@
 import type { Metadata, Viewport } from "next";
+import { Manrope, Noto_Sans } from "next/font/google";
 import "./globals.css";
 import { CartProviderWrapper } from "@/components/CartProviderWrapper";
 import { BottomNav } from "@/components/BottomNav";
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+});
+
+const notoSans = Noto_Sans({
+  subsets: ["latin"],
+  variable: "--font-noto-sans",
+  weight: ["400", "500", "700", "900"],
+});
 
 export const metadata: Metadata = {
   title: "Moda Store - Loja de Roupas",
@@ -12,8 +24,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   themeColor: "#fcf8fa",
 };
 
@@ -23,15 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Noto+Sans:wght@400;500;700;900&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="pt-BR" className={`${manrope.variable} ${notoSans.variable}`}>
       <body className="antialiased">
         <CartProviderWrapper>
           {children}

@@ -1,0 +1,106 @@
+
+// ============================================================
+// Prisma Schema - Banco de Dados
+// ============================================================
+// Define as tabelas do PostgreSQL e gera o client TypeScript.
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// ─── USUÁRIOS (Clientes e Admins) ──────────────────────────
+model User {
+    id        String   @id @default(uuid())
+    email     String   @unique
+    name      String?
+    password  String?  // Para login com senha (se necessário)
+    role      Role     @default(CUSTOMER)
+    orders    Order[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+enum Role {
+    CUSTOMER
+    ADMIN
+}
+
+// ─── PRODUTOS ──────────────────────────────────────────────
+model Product {
+    id          String        @id @default(uuid())
+    name        String
+    description String
+    price       Float
+    category    String
+    images      String[]      // URLs do Oracle Object Storage
+    stock       ProductStock[]
+    orderItems  OrderItem[]
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+}
+
+model ProductStock {
+    id        String  @id @default(uuid())
+    productId String
+    product   Product @relation(fields: [productId], references: [id])
+    size      String
+    color     String
+    quantity  Int
+    
+    @@unique([productId, size, color]) // Garante que a combinação seja única
+}
+
+// ─── PEDIDOS ──────────────────────────────────────────────
+model Order {
+    id                    String      @id @default(uuid())
+    status                OrderStatus @default(PENDING)
+    total                 Int         // Em centavos (R$ 10,00 -> 1000)
+    subtotal              Int
+    shippingCost          Int
+    
+    // Cliente
+    customerName          String
+    customerEmail         String
+    customerId            String?
+    customer              User?       @relation(fields: [customerId], references: [id])
+
+    // Pagamento
+    paymentMethod         String      // PIX, CREDIT_CARD, BOLETO
+    stripePaymentIntentId String?     @unique
+    stripeSessionId       String?     @unique
+    idempotencyKey        String?     @unique
+    paidAt                DateTime?
+
+    // Itens
+    items                 OrderItem[]
+
+    createdAt             DateTime    @default(now())
+    updatedAt             DateTime    @updatedAt
+}
+
+model OrderItem {
+    id        String  @id @default(uuid())
+    orderId   String
+    order     Order   @relation(fields: [orderId], references: [id])
+    productId String
+    product   Product @relation(fields: [productId], references: [id])
+    name      String
+    price     Int     // Preço no momento da compra (snapshot)
+    quantity  Int
+    size      String
+    color     String
+}
+
+enum OrderStatus {
+    PENDING
+    PROCESSING
+    PAID
+    FAILED
+    CANCELLED
+    REFUNDED
+}

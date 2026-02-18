@@ -16,7 +16,7 @@ cd "$PROJECT_DIR" || exit
 
 # 2. Atualizar código fonte
 echo "📥 Puxando alterações do GitHub..."
-git pull origin main
+git pull origin master
 
 # 3. Rebuildar e Reiniciar Containers
 echo "🏗️ Rebuildando containers (Docker Compose)..."

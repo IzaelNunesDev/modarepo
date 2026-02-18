@@ -3,6 +3,7 @@ import cors from 'cors';
 import { env } from './config/env';
 import paymentRoutes from './routes/payment.routes';
 import webhookRoutes from './routes/webhook.routes';
+import uploadRoutes from './routes/upload.routes';
 import { shutdownWorkers } from './queues/payment.worker';
 
 // ============================================================
@@ -32,6 +33,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // ─── Rotas ────────────────────────────────────────────────────
 app.use('/api/payment', paymentRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // ─── Health Check ─────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

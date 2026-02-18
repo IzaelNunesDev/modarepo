@@ -18,8 +18,12 @@ if [ ! -f "docker-compose.yml" ]; then
     exit 1
 fi
 
-if [ ! -f ".env.production" ]; then
-    echo "❌ Erro: .env.production não encontrado."
+if [ -f ".env.production" ]; then
+    export $(grep -v '^#' .env.production | xargs)
+fi
+
+if [ -z "${PUBLIC_IP:-}" ]; then
+    echo "❌ Erro: PUBLIC_IP não definido no .env.production"
     exit 1
 fi
 
@@ -65,9 +69,10 @@ echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║   ✅ Deploy concluído!                                     ║"
 echo "║                                                              ║"
-echo "║   🌐 Acesse: http://144.22.222.29                           ║"
-echo "║   📋 API:    http://144.22.222.29/api                        ║"
-echo "║   🏥 Health: http://144.22.222.29/api/health                 ║"
+echo "║   🌐 Acesse: http://${PUBLIC_IP}                           ║
+║   📋 API:    http://${PUBLIC_IP}/api                        ║
+║   🏥 Health: http://${PUBLIC_IP}/api/health                 ║
+"
 echo "║                                                              ║"
 echo "║   📊 Comandos úteis:                                        ║"
 echo "║   • Logs:    docker compose logs -f                         ║"

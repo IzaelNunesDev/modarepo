@@ -21,13 +21,29 @@ services:
     networks:
       - moda-network
 
+  # ─── Database (PostgreSQL) ────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: moda-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-modadb}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - moda-network
+    restart: unless-stopped
+
   # ─── Frontend (Next.js) ──────────────────────────────────
   frontend:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://144.22.222.29
+        NEXT_PUBLIC_API_URL: http://${PUBLIC_IP}
     container_name: moda-frontend
     expose:
       - "3000"
@@ -75,6 +91,8 @@ services:
 # ─── Volumes ───────────────────────────────────────────────
 volumes:
   redis-data:
+    driver: local
+  postgres-data:
     driver: local
 
 # ─── Network ──────────────────────────────────────────────

@@ -30,7 +30,7 @@ Sistema SaaS completo para loja de roupas com vitrine de produtos, painel admini
 ## �🚀 Tecnologias
 
 ### Frontend
-- **Next.js 16** - Framework React Full Stack
+- **Next.js 15** - Framework React Full Stack
 - **TypeScript** - Tipagem estática
 - **Tailwind CSS 4** - Estilização
 
