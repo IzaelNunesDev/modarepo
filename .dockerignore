@@ -5,7 +5,7 @@ node_modules
 *.md
 .agent
 design_assets
-imgs
+
 *.tar.gz
 *.pem
 *.log
