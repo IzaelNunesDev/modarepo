@@ -11,9 +11,10 @@ echo "║   🛍️  Moda Store — Setup do Servidor Oracle Cloud          ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 
-# ─── 1. Atualizar Sistema ─────────────────────────────────────
-echo "📦 [1/5] Atualizando sistema..."
+# ─── 1. Atualizar Sistema & Instalar Git ──────────────────────
+echo "📦 [1/5] Atualizando sistema e instalando Git..."
 sudo apt update && sudo apt upgrade -y
+sudo apt install -y git curl gnupg lsb-release ca-certificates
 
 # ─── 2. Instalar Docker ──────────────────────────────────────
 echo "🐳 [2/5] Instalando Docker..."
@@ -71,8 +72,8 @@ echo "✅ Portas 80 e 443 abertas"
 
 # ─── 5. Criar diretório do projeto ───────────────────────────
 echo "📂 [5/5] Criando diretório do projeto..."
-mkdir -p ~/moda-store
-echo "✅ Diretório ~/moda-store criado"
+mkdir -p ~/modarepo
+echo "✅ Diretório ~/modarepo criado"
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
@@ -84,6 +85,6 @@ echo "║                                                              ║"
 echo "║   Próximo passo:                                            ║"
 echo "║   1. Faça logout: exit                                      ║"
 echo "║   2. Reconecte via SSH                                      ║"
-echo "║   3. Envie os arquivos do projeto                           ║"
-echo "║   4. Execute: bash deploy.sh                                ║"
+echo "║   3. No servidor, rode: git clone [seu-repo] ~/modarepo     ║"
+echo "║   4. Os próximos pushs do GitHub farão o resto!             ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
