@@ -1,6 +1,6 @@
-
 import Link from 'next/link';
 import { Product } from '@/types';
+import { ShoppingBag } from 'lucide-react';
 
 interface ProductCardProps {
     product: Product;
@@ -8,25 +8,45 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
     return (
-        <Link href={`/produto/${product.id}`} className="group relative block transition-all duration-300 hover:scale-[1.02]">
-            <div className="glass p-3 rounded-2xl h-full flex flex-col hover:bg-white/60 transition-colors shadow-sm hover:shadow-lg backdrop-blur-sm border border-white/60">
-                <div
-                    className="w-full aspect-[3/4] bg-center bg-no-repeat bg-cover rounded-xl shadow-inner mb-3"
-                    style={{ backgroundImage: `url("${product.images[0]}")` }}
-                />
-                <div className="flex flex-col gap-1 mt-auto">
-                    <p className="text-[var(--text-primary)] text-sm font-bold leading-tight line-clamp-2 min-h-[2.5em]">
-                        {product.name}
-                    </p>
-                    <div className="flex justify-between items-center mt-1">
-                        <p className="text-[var(--accent-pink)] text-base font-extrabold">
+        <Link href={`/produto/${product.id}`} className="group relative block h-full">
+            <div className="relative h-full flex flex-col gap-3">
+                {/* Image Container */}
+                <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-slate-100">
+                    {/* Badge (Optional - can be added based on props) */}
+                    {/* <div className="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 text-[10px] font-bold uppercase tracking-widest rounded-sm z-10">Novo</div> */}
+
+                    <div
+                        className="h-full w-full bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105"
+                        style={{ backgroundImage: `url("${product.images[0]}")` }}
+                    />
+
+                    {/* Overlay with Quick Action (Optional) */}
+                    <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/5" />
+
+                    {/* Floating Action Button (Visible on Hover) */}
+                    <div className="absolute bottom-3 right-3 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                        <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-900 shadow-lg hover:bg-slate-900 hover:text-white transition-colors">
+                            <ShoppingBag size={18} strokeWidth={2} />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Details */}
+                <div className="flex flex-col gap-1">
+                    <div className="flex justify-between items-start gap-2">
+                        <h3 className="text-sm font-bold text-slate-700 leading-tight group-hover:text-pink-600 transition-colors line-clamp-2">
+                            {product.name}
+                        </h3>
+                    </div>
+
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-lg font-black text-slate-900">
                             R$ {product.price.toFixed(2).replace('.', ',')}
-                        </p>
-                        <div className="bg-[var(--accent-pink)]/10 text-[var(--accent-pink)] p-1.5 rounded-full transition-colors group-hover:bg-[var(--accent-pink)] group-hover:text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
-                                <path d="M222.14,58.87A8,8,0,0,0,216,56H54.68L49.79,29.14A16,16,0,0,0,34.05,16H16a8,8,0,0,0,0,16h18L59.56,172.29a24,24,0,0,0,5.33,11.27,28,28,0,1,0,44.4,8.44h45.42A27.75,27.75,0,0,0,152,204a28,28,0,1,0,28-28H83.17a8,8,0,0,1-7.87-6.57L72.13,152h116a24,24,0,0,0,23.61-19.71l12.16-66.86A8,8,0,0,0,222.14,58.87ZM96,204a12,12,0,1,1-12-12A12,12,0,0,1,96,204Zm96,0a12,12,0,1,1-12-12A12,12,0,0,1,192,204Z"></path>
-                            </svg>
-                        </div>
+                        </span>
+                        {/* Fake "Installments" text for perceived value */}
+                        <span className="text-[10px] text-slate-400 font-medium">
+                            3x R$ {(product.price / 3).toFixed(2).replace('.', ',')}
+                        </span>
                     </div>
                 </div>
             </div>

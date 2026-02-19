@@ -14,10 +14,13 @@ O backend está respondendo corretamente às requisições de Health Check.
 - **Uptime:** ~33 minutos (no momento da verificação)
 - **Timestamp:** `2026-02-18T04:37:50.380Z`
 
-## 🌐 Acesso
-- **Frontend:** [http://144.22.222.29](http://144.22.222.29)
-- **API:** [http://144.22.222.29/api](http://144.22.222.29/api)
-- **Health:** [http://144.22.222.29/api/health](http://144.22.222.29/api/health)
+## 🌐 Acesso (HTTPS)
+- **Frontend:** [https://144.22.222.29](https://144.22.222.29)
+- **API:** [https://144.22.222.29/api](https://144.22.222.29/api)
+- **Health:** [https://144.22.222.29/api/health](https://144.22.222.29/api/health)
+
+> **Nota:** Como estamos usando um IP direto, o certificado SSL é **auto-assinado**. O navegador exibirá um aviso de segurança. É necessário aceitar o risco (clicar em "Avançado" -> "Continuar para...") para acessar a aplicação.
+
 
 ## 🛠️ Logs e Troubleshooting (Via SSH)
 

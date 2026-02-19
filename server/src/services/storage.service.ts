@@ -47,14 +47,20 @@ export async function uploadFile(
 
         await s3Client.send(command);
 
-        // Monta a URL pública (ajuste conforme seu padrão de URL da Oracle)
-        // Padrão Oracle: https://objectstorage.{region}.oraclecloud.com/n/{namespace}/b/{bucket}/o/{object}
-        // Mas se o endpoint for customizado, pode variar.
-        // Vamos usar uma construção genérica baseada no endpoint se possível.
+        await s3Client.send(command);
 
-        // Se endpoint termina com .com, assumimos que é a base.
-        const endpoint = process.env.ORACLE_ENDPOINT?.replace(/\/+$/, "");
-        return `${endpoint}/${BUCKET_NAME}/${uniqueKey}`;
+        // Use Native OCI URL format for public access
+        // https://objectstorage.{region}.oraclecloud.com/n/{namespace}/b/{bucket}/o/{object}
+        const region = process.env.ORACLE_REGION || "sa-saopaulo-1";
+        const namespace = process.env.ORACLE_NAMESPACE;
+
+        if (!namespace) {
+            console.warn("ORACLE_NAMESPACE not set, using S3 compat URL as fallback");
+            const endpoint = process.env.ORACLE_ENDPOINT?.replace(/\/+$/, "");
+            return `${endpoint}/${BUCKET_NAME}/${uniqueKey}`;
+        }
+
+        return `https://objectstorage.${region}.oraclecloud.com/n/${namespace}/b/${BUCKET_NAME}/o/${uniqueKey}`;
 
     } catch (error) {
         console.error("❌ Erro no upload para Oracle Object Storage:", error);

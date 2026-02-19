@@ -10,8 +10,10 @@ services:
     container_name: moda-nginx
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
     depends_on:
       frontend:
         condition: service_started
@@ -43,7 +45,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://${PUBLIC_IP}
+        NEXT_PUBLIC_API_URL: https://${PUBLIC_IP}
     container_name: moda-frontend
     expose:
       - "3000"

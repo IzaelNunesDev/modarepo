@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { useCart } from '@/contexts/CartContext';
+import { Lock, CreditCard, Barcode, CheckCircle2, Copy, ExternalLink, QrCode } from 'lucide-react';
 
 type PaymentMethod = 'pix' | 'credit_card' | 'boleto';
 type CheckoutStep = 'form' | 'processing' | 'payment' | 'success' | 'error';
@@ -199,108 +200,105 @@ export default function CheckoutPage() {
     // ════════════════════════════════════════════════════════════
     if (step === 'success') {
         return (
-            <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col items-center justify-center p-6 text-center">
-                {/* Animação de check */}
-                <div className="relative mb-8">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-200 animate-check-appear">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="white" viewBox="0 0 256 256">
-                            <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" />
-                        </svg>
+            <div className="min-h-screen bg-[#FAFAFA] flex flex-col items-center justify-center p-6 text-center">
+                <div className="bg-white p-8 rounded-3xl shadow-lg border border-slate-100 max-w-md w-full animate-in fade-in zoom-in duration-500">
+                    <div className="relative mb-8 flex justify-center">
+                        <div className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center shadow-inner animate-check-appear text-green-600">
+                            <CheckCircle2 size={48} strokeWidth={3} />
+                        </div>
                     </div>
-                    <div className="absolute inset-0 w-24 h-24 rounded-full bg-green-400 animate-ping opacity-20" />
-                </div>
 
-                <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
-                    Pagamento Confirmado! 🎉
-                </h1>
-                <p className="text-[var(--text-secondary)] mb-2">
-                    Seu pedido foi realizado com sucesso.
-                </p>
-                {checkoutResult && (
-                    <div className="bg-white px-6 py-3 rounded-xl border border-[var(--border-light)] mb-6 inline-block">
-                        <p className="text-sm text-[var(--text-secondary)]">Pedido</p>
-                        <p className="text-lg font-bold text-[var(--text-primary)] font-mono">{checkoutResult.orderId}</p>
-                    </div>
-                )}
+                    <h1 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">
+                        Pagamento Confirmado!
+                    </h1>
+                    <p className="text-slate-500 mb-6">
+                        Seu pedido foi processado e já está sendo preparado com carinho.
+                    </p>
 
-                <div className="space-y-3 w-full max-w-sm">
-                    <a
-                        href="/"
-                        className="block w-full py-3 bg-[var(--accent-pink)] text-white font-bold rounded-lg text-center transition-all hover:opacity-90"
-                    >
-                        Voltar à Loja
-                    </a>
                     {checkoutResult && (
-                        <button
-                            onClick={() => window.open(`${API_URL}/api/payment/order/${checkoutResult.orderId}`, '_blank')}
-                            className="w-full py-3 border-2 border-[var(--border-light)] text-[var(--text-primary)] font-bold rounded-lg transition-all hover:bg-[var(--bg-secondary)]"
-                        >
-                            Ver Detalhes do Pedido
-                        </button>
+                        <div className="bg-slate-50 px-6 py-4 rounded-2xl border border-slate-100 mb-8 inline-block w-full">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Número do Pedido</p>
+                            <p className="text-xl font-mono font-bold text-slate-800 tracking-wider">#{checkoutResult.orderId.slice(0, 8)}</p>
+                        </div>
                     )}
+
+                    <div className="space-y-3 w-full">
+                        <button
+                            onClick={() => router.push('/')}
+                            className="w-full py-4 bg-slate-900 text-white font-bold rounded-xl transition-all hover:bg-slate-800 shadow-xl shadow-slate-900/10 active:scale-95"
+                        >
+                            Continuar Comprando
+                        </button>
+                        {checkoutResult && (
+                            <button
+                                onClick={() => window.open(`${API_URL}/api/payment/order/${checkoutResult.orderId}`, '_blank')}
+                                className="w-full py-4 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl transition-all hover:bg-slate-50 active:scale-95"
+                            >
+                                Ver Detalhes
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         );
     }
 
     // ════════════════════════════════════════════════════════════
-    // TELA DE PAGAMENTO (PIX / BOLETO)
+    // TELA DE PAGAMENTO (PIX / BOLETO / CARD)
     // ════════════════════════════════════════════════════════════
     if (step === 'payment' && checkoutResult) {
         return (
-            <div className="min-h-screen bg-[var(--bg-primary)]">
-                <Header title="Pagamento" showBackButton backHref="/checkout" />
+            <div className="min-h-screen bg-[#FAFAFA] text-slate-800">
+                <Header title="Realizar Pagamento" showBackButton backHref="/checkout" />
 
-                <main className="px-4 pb-32 pt-2">
+                <main className="px-4 pb-32 pt-6 max-w-lg mx-auto">
                     {/* Status badge */}
-                    <div className="flex justify-center mb-6">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full">
-                            <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                            <span className="text-sm font-medium text-amber-700">Aguardando Pagamento</span>
+                    <div className="flex justify-center mb-8">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-yellow-50 border border-yellow-200 rounded-full shadow-sm">
+                            <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+                            <span className="text-xs font-bold uppercase tracking-wide text-yellow-700">Aguardando Pagamento</span>
                         </div>
                     </div>
 
                     {/* PIX */}
                     {paymentMethod === 'pix' && (
-                        <div className="space-y-4">
-                            {/* QR Code */}
+                        <div className="space-y-6">
                             {checkoutResult.pixQrCode && (
-                                <div className="bg-white p-6 rounded-2xl border border-[var(--border-light)] text-center">
-                                    <h3 className="text-[var(--text-primary)] font-bold text-lg mb-4">
+                                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center">
+                                    <h3 className="text-slate-900 font-bold text-lg mb-6">
                                         Escaneie o QR Code
                                     </h3>
-                                    <div className="inline-block p-4 bg-white rounded-xl border-2 border-[var(--border-light)] mb-4">
+                                    <div className="inline-block p-4 bg-white rounded-2xl border-2 border-slate-100 mb-6 shadow-inner">
                                         <img
                                             src={checkoutResult.pixQrCode}
                                             alt="QR Code PIX"
-                                            className="w-48 h-48"
+                                            className="w-48 h-48 mix-blend-multiply"
                                         />
                                     </div>
-                                    <p className="text-sm text-[var(--text-secondary)]">
-                                        Valor: <span className="font-bold text-[var(--text-primary)]">R$ {total.toFixed(2).replace('.', ',')}</span>
-                                    </p>
+                                    <div className="bg-slate-50 py-3 px-4 rounded-xl inline-block">
+                                        <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">Valor Total</p>
+                                        <span className="text-2xl font-black text-slate-900">R$ {total.toFixed(2).replace('.', ',')}</span>
+                                    </div>
                                 </div>
                             )}
 
-                            {/* Copia e Cola */}
                             {checkoutResult.pixCopyPaste && (
-                                <div className="bg-white p-4 rounded-2xl border border-[var(--border-light)]">
-                                    <h3 className="text-[var(--text-primary)] font-bold text-sm mb-3">
+                                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                                    <h3 className="text-slate-900 font-bold text-sm mb-4">
                                         Ou copie o código PIX
                                     </h3>
-                                    <div className="bg-[var(--bg-secondary)] p-3 rounded-lg mb-3">
-                                        <p className="text-xs font-mono text-[var(--text-primary)] break-all leading-relaxed">
-                                            {checkoutResult.pixCopyPaste}
-                                        </p>
+                                    <div className="bg-slate-50 p-4 rounded-xl mb-4 border border-slate-100 font-mono text-xs text-slate-600 break-all leading-relaxed">
+                                        {checkoutResult.pixCopyPaste}
                                     </div>
                                     <button
                                         onClick={handleCopyPix}
-                                        className={`w-full py-3 rounded-lg font-bold transition-all ${pixCopied
-                                            ? 'bg-green-500 text-white'
-                                            : 'bg-[var(--accent-pink)] text-white hover:opacity-90'
+                                        className={`w-full py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${pixCopied
+                                            ? 'bg-green-500 text-white shadow-lg shadow-green-500/20'
+                                            : 'bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-900/10'
                                             }`}
                                     >
-                                        {pixCopied ? '✓ Copiado!' : 'Copiar Código PIX'}
+                                        {pixCopied ? <CheckCircle2 size={18} /> : <Copy size={18} />}
+                                        {pixCopied ? 'Copiado!' : 'Copiar Código'}
                                     </button>
                                 </div>
                             )}
@@ -309,115 +307,91 @@ export default function CheckoutPage() {
 
                     {/* Boleto */}
                     {paymentMethod === 'boleto' && (
-                        <div className="space-y-4">
-                            <div className="bg-white p-6 rounded-2xl border border-[var(--border-light)] text-center">
-                                <div className="w-16 h-16 bg-[var(--bg-secondary)] rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256" className="text-[var(--accent-pink)]">
-                                        <path d="M232,48V208a8,8,0,0,1-16,0V48a8,8,0,0,1,16,0ZM56,40a8,8,0,0,0-8,8V208a8,8,0,0,0,16,0V48A8,8,0,0,0,56,40Zm40,0a8,8,0,0,0-8,8V208a8,8,0,0,0,16,0V48A8,8,0,0,0,96,40Zm80,0a8,8,0,0,0-8,8V208a8,8,0,0,0,16,0V48A8,8,0,0,0,176,40Zm-40,0a8,8,0,0,0-8,8V208a8,8,0,0,0,16,0V48A8,8,0,0,0,136,40ZM16,40a8,8,0,0,0-8,8V208a8,8,0,0,0,16,0V48A8,8,0,0,0,16,40Z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-[var(--text-primary)] font-bold text-lg mb-2">
-                                    Boleto Gerado
-                                </h3>
-                                <p className="text-sm text-[var(--text-secondary)] mb-4">
-                                    Vencimento em 3 dias úteis
-                                </p>
-
-                                {checkoutResult.boletoBarcode && (
-                                    <div className="bg-[var(--bg-secondary)] p-3 rounded-lg mb-4">
-                                        <p className="text-xs font-mono text-[var(--text-primary)] break-all">
-                                            {checkoutResult.boletoBarcode}
-                                        </p>
-                                    </div>
-                                )}
-
-                                {checkoutResult.boletoUrl && (
-                                    <a
-                                        href={checkoutResult.boletoUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="block w-full py-3 bg-[var(--accent-pink)] text-white font-bold rounded-lg text-center transition-all hover:opacity-90"
-                                    >
-                                        Abrir Boleto
-                                    </a>
-                                )}
+                        <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm text-center">
+                            <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-6 transform rotate-3">
+                                <Barcode className="text-slate-700 w-8 h-8" />
                             </div>
+                            <h3 className="text-slate-900 font-bold text-xl mb-2">
+                                Boleto Gerado
+                            </h3>
+                            <p className="text-sm text-slate-500 mb-8 font-medium">
+                                Vencimento em 3 dias úteis
+                            </p>
+
+                            {checkoutResult.boletoBarcode && (
+                                <div className="bg-slate-50 p-4 rounded-xl mb-6 border border-slate-100">
+                                    <p className="text-xs font-mono text-slate-600 break-all tracking-wider">
+                                        {checkoutResult.boletoBarcode}
+                                    </p>
+                                </div>
+                            )}
+
+                            {checkoutResult.boletoUrl && (
+                                <a
+                                    href={checkoutResult.boletoUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block w-full py-4 bg-slate-900 text-white font-bold rounded-xl text-center transition-all hover:bg-slate-800 shadow-lg shadow-slate-900/10"
+                                >
+                                    Visualizar Boleto
+                                </a>
+                            )}
                         </div>
                     )}
 
-                    {/* Cartão de Crédito - Ação Manual para Dev */}
+                    {/* Cartão (Dev Mode) */}
                     {paymentMethod === 'credit_card' && (
-                        <div className="bg-white p-6 rounded-2xl border border-[var(--border-light)] text-center space-y-4">
-                            <div className="w-16 h-16 bg-[var(--bg-secondary)] rounded-full flex items-center justify-center mx-auto mb-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256" className="text-[var(--accent-pink)]">
-                                    <path d="M224,48H32A16,16,0,0,0,16,64V192a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V64A16,16,0,0,0,224,48Zm0,16V88H32V64ZM32,192V104H224v88Z" />
-                                </svg>
+                        <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm text-center space-y-6">
+                            <div className="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center mx-auto mb-2 transform -rotate-3">
+                                <CreditCard className="text-pink-500 w-8 h-8" />
                             </div>
 
-                            <h3 className="text-[var(--text-primary)] font-bold text-lg">
-                                Pagamento via Cartão
-                            </h3>
-                            <p className="text-sm text-[var(--text-secondary)]">
-                                Escolha como prosseguir com o pagamento.
-                            </p>
+                            <div>
+                                <h3 className="text-slate-900 font-bold text-xl">Pagamento via Cartão</h3>
+                                <p className="text-sm text-slate-500 mt-2">Escolha como prosseguir (Ambiente de Teste)</p>
+                            </div>
 
-                            <div className="space-y-3 pt-2">
+                            <div className="space-y-4 pt-4">
                                 {checkoutResult.paymentUrl && (
                                     <a
                                         href={checkoutResult.paymentUrl}
-                                        className="block w-full py-3 bg-[var(--text-primary)] text-white font-bold rounded-lg hover:opacity-90 transition-all shadow-lg text-center"
+                                        className="flex w-full items-center justify-center gap-2 py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20"
                                     >
-                                        Ir para Pagamento Real (Stripe)
+                                        <span>Ir para Pagamento Real (Stripe)</span>
+                                        <ExternalLink size={16} />
                                     </a>
                                 )}
 
-                                <div className="relative py-2 hidden md:block">
+                                <div className="relative py-2">
                                     <div className="absolute inset-0 flex items-center">
-                                        <span className="w-full border-t border-[var(--border-light)]" />
+                                        <span className="w-full border-t border-slate-100" />
                                     </div>
-                                    <div className="relative flex justify-center text-xs uppercase">
-                                        <span className="bg-white px-2 text-[var(--text-secondary)]">Ou (Modo Dev)</span>
+                                    <div className="relative flex justify-center text-xs uppercase font-bold tracking-widest">
+                                        <span className="bg-white px-2 text-slate-400">Desenvolvimento</span>
                                     </div>
                                 </div>
 
                                 <button
                                     onClick={handleSimulateSuccess}
-                                    className="w-full py-3 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition-all flex items-center justify-center gap-2"
+                                    className="w-full py-4 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
-                                        <path d="M104,192a8.5,8.5,0,0,1-5.7-2.3l-56-56a8.1,8.1,0,0,1,11.4-11.4L104,172.7,202.3,74.3a8.1,8.1,0,0,1,11.4,11.4l-104,104A8.5,8.5,0,0,1,104,192Z" />
-                                    </svg>
-                                    Simular Pagamento Aprovado
+                                    <CheckCircle2 size={18} />
+                                    Simular Aprovação Instantânea
                                 </button>
-                                <p className="text-[10px] text-[var(--text-secondary)]">
-                                    Isso simula o webhook de sucesso do Stripe instantaneamente e aprova o pedido.
-                                </p>
                             </div>
                         </div>
                     )}
 
-                    {/* Pedido info */}
-                    <div className="mt-6 bg-white p-4 rounded-xl border border-[var(--border-light)]">
-                        <div className="flex justify-between text-sm mb-2">
-                            <span className="text-[var(--text-secondary)]">Pedido</span>
-                            <span className="text-[var(--text-primary)] font-mono text-xs">{checkoutResult.orderId}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                            <span className="text-[var(--text-secondary)]">Total</span>
-                            <span className="text-[var(--accent-pink)] font-bold">R$ {total.toFixed(2).replace('.', ',')}</span>
-                        </div>
-                    </div>
-
-                    {/* Botão de simulação (apenas dev) */}
-                    <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                        <p className="text-xs text-amber-700 mb-3 font-medium">
-                            🧪 Modo Desenvolvimento — Simular pagamento
+                    {/* Botão de simulação (apenas dev) - Visible for all methods */}
+                    <div className="mt-8 p-5 bg-yellow-50/50 border border-yellow-100 rounded-2xl text-center">
+                        <p className="text-xs text-yellow-700 mb-4 font-bold uppercase tracking-wider">
+                            Ambiente de Desenvolvimento
                         </p>
                         <button
                             onClick={handleSimulateSuccess}
-                            className="w-full py-3 bg-green-500 text-white font-bold rounded-lg transition-all hover:bg-green-600"
+                            className="w-full py-3 bg-white border border-yellow-200 text-yellow-700 font-bold rounded-xl transition-all hover:bg-yellow-50 text-sm"
                         >
-                            ✓ Simular Pagamento Aprovado
+                            Simular Webhook de Sucesso
                         </button>
                     </div>
                 </main>
@@ -430,28 +404,28 @@ export default function CheckoutPage() {
     // ════════════════════════════════════════════════════════════
     if (step === 'error') {
         return (
-            <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col items-center justify-center p-6 text-center">
-                <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 256 256" className="text-red-500">
-                        <path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z" />
+            <div className="min-h-screen bg-[#FAFAFA] flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6 shadow-sm border border-red-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-red-500" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </div>
-                <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
+                <h1 className="text-2xl font-black text-slate-900 mb-2">
                     Ops! Algo deu errado
                 </h1>
-                <p className="text-[var(--text-secondary)] mb-6 max-w-sm">
+                <p className="text-slate-500 mb-8 max-w-sm">
                     {error || 'Ocorreu um erro ao processar o pagamento.'}
                 </p>
-                <div className="space-y-3 w-full max-w-sm">
+                <div className="space-y-3 w-full max-w-xs">
                     <button
                         onClick={() => { setStep('form'); setError(''); }}
-                        className="block w-full py-3 bg-[var(--accent-pink)] text-white font-bold rounded-lg text-center"
+                        className="block w-full py-3.5 bg-slate-900 text-white font-bold rounded-xl shadow-lg transition-transform active:scale-95"
                     >
                         Tentar Novamente
                     </button>
                     <a
                         href="/carrinho"
-                        className="block w-full py-3 border-2 border-[var(--border-light)] text-[var(--text-primary)] font-bold rounded-lg text-center"
+                        className="block w-full py-3.5 text-slate-600 font-bold rounded-xl hover:bg-slate-100 transition-colors"
                     >
                         Voltar ao Carrinho
                     </a>
@@ -464,227 +438,195 @@ export default function CheckoutPage() {
     // FORMULÁRIO DE CHECKOUT (PRINCIPAL)
     // ════════════════════════════════════════════════════════════
     return (
-        <div className="min-h-screen bg-[var(--bg-primary)]">
-            <Header title="Checkout" showBackButton backHref="/carrinho" />
+        <div className="min-h-screen bg-[#FAFAFA] text-slate-800">
+            <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+                <Header title="Finalizar Pedido" showBackButton backHref="/carrinho" />
+            </div>
 
-            <main className="px-4 pb-32 pt-2">
-                {/* Erro inline */}
-                {error && (
-                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-sm text-red-600">{error}</p>
+            <main className="max-w-6xl mx-auto px-4 lg:px-6 py-8 pb-32 lg:pb-12">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+                    {/* Left Column: Forms */}
+                    <div className="lg:col-span-7 space-y-8">
+                        {/* Erro inline */}
+                        {error && (
+                            <div className="p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3 animate-shake">
+                                <span className="text-red-500 mt-0.5">⚠️</span>
+                                <p className="text-sm font-medium text-red-700">{error}</p>
+                            </div>
+                        )}
+
+                        {/* Endereço */}
+                        <section className="bg-white p-6 lg:p-8 rounded-3xl border border-slate-100 shadow-sm">
+                            <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-900 text-white text-xs">1</span>
+                                Endereço de Entrega
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="md:col-span-2">
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Rua e Número</label>
+                                    <input
+                                        type="text"
+                                        value={street}
+                                        onChange={(e) => setStreet(e.target.value)}
+                                        className="w-full h-12 px-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all font-medium"
+                                        placeholder="Ex: Av. Paulista, 1000"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">CEP</label>
+                                    <input
+                                        type="text"
+                                        value={cep}
+                                        onChange={(e) => setCep(e.target.value)}
+                                        className="w-full h-12 px-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all font-medium"
+                                        placeholder="00000-000"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Cidade</label>
+                                    <input
+                                        type="text"
+                                        value={city}
+                                        onChange={(e) => setCity(e.target.value)}
+                                        className="w-full h-12 px-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all font-medium"
+                                        placeholder="São Paulo"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Estado</label>
+                                    <input
+                                        type="text"
+                                        value={state}
+                                        onChange={(e) => setState(e.target.value)}
+                                        className="w-full h-12 px-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all font-medium"
+                                        placeholder="SP"
+                                    />
+                                </div>
+                                <div className="md:col-span-2 mt-2">
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">E-mail para contao (opcional)</label>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="w-full h-12 px-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all font-medium"
+                                        placeholder="seu@email.com"
+                                    />
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Pagamento */}
+                        <section className="bg-white p-6 lg:p-8 rounded-3xl border border-slate-100 shadow-sm">
+                            <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-900 text-white text-xs">2</span>
+                                Pagamento
+                            </h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <button
+                                    onClick={() => setPaymentMethod('pix')}
+                                    className={`relative p-4 rounded-2xl border-2 transition-all flex flex-col items-center justify-center gap-3 h-32 hover:border-slate-300 ${paymentMethod === 'pix'
+                                        ? 'border-slate-900 bg-slate-900 text-white shadow-lg shadow-slate-900/20'
+                                        : 'border-slate-100 bg-slate-50 text-slate-500'
+                                        }`}
+                                >
+                                    <QrCode size={24} />
+                                    <span className="font-bold text-sm">PIX</span>
+                                    {paymentMethod === 'pix' && <div className="absolute top-3 right-3 w-2 h-2 bg-green-400 rounded-full animate-pulse" />}
+                                </button>
+
+                                <button
+                                    onClick={() => setPaymentMethod('credit_card')}
+                                    className={`relative p-4 rounded-2xl border-2 transition-all flex flex-col items-center justify-center gap-3 h-32 hover:border-slate-300 ${paymentMethod === 'credit_card'
+                                        ? 'border-slate-900 bg-slate-900 text-white shadow-lg shadow-slate-900/20'
+                                        : 'border-slate-100 bg-slate-50 text-slate-500'
+                                        }`}
+                                >
+                                    <CreditCard size={24} />
+                                    <span className="font-bold text-sm">Cartão</span>
+                                    {paymentMethod === 'credit_card' && <div className="absolute top-3 right-3 w-2 h-2 bg-green-400 rounded-full animate-pulse" />}
+                                </button>
+
+                                <button
+                                    onClick={() => setPaymentMethod('boleto')}
+                                    className={`relative p-4 rounded-2xl border-2 transition-all flex flex-col items-center justify-center gap-3 h-32 hover:border-slate-300 ${paymentMethod === 'boleto'
+                                        ? 'border-slate-900 bg-slate-900 text-white shadow-lg shadow-slate-900/20'
+                                        : 'border-slate-100 bg-slate-50 text-slate-500'
+                                        }`}
+                                >
+                                    <Barcode size={24} />
+                                    <span className="font-bold text-sm">Boleto</span>
+                                    {paymentMethod === 'boleto' && <div className="absolute top-3 right-3 w-2 h-2 bg-green-400 rounded-full animate-pulse" />}
+                                </button>
+                            </div>
+
+                            <div className="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
+                                <Lock size={16} className="text-slate-400 mt-0.5 shrink-0" />
+                                <p className="text-xs text-slate-500 leading-relaxed">
+                                    Seus dados de pagamento são processados de forma segura e criptografada. Não armazenamos informações sensíveis do seu cartão.
+                                </p>
+                            </div>
+                        </section>
                     </div>
-                )}
 
-                {/* Endereço de Entrega */}
-                <section className="mb-6">
-                    <h2 className="text-[var(--text-primary)] font-bold text-lg mb-3">
-                        Endereço de Entrega
-                    </h2>
-                    <div className="bg-white p-4 rounded-xl border border-[var(--border-light)]">
-                        <div className="space-y-3">
-                            <input
-                                type="text"
-                                placeholder="CEP"
-                                value={cep}
-                                onChange={(e) => setCep(e.target.value)}
-                                className="w-full h-12 px-4 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-pink)]"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Rua, número"
-                                value={street}
-                                onChange={(e) => setStreet(e.target.value)}
-                                className="w-full h-12 px-4 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-pink)]"
-                            />
-                            <div className="flex gap-3">
-                                <input
-                                    type="text"
-                                    placeholder="Cidade"
-                                    value={city}
-                                    onChange={(e) => setCity(e.target.value)}
-                                    className="flex-1 h-12 px-4 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-pink)]"
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="UF"
-                                    value={state}
-                                    onChange={(e) => setState(e.target.value)}
-                                    className="w-20 h-12 px-4 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-pink)]"
-                                />
-                            </div>
-                            <input
-                                type="email"
-                                placeholder="E-mail (opcional)"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full h-12 px-4 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-pink)]"
-                            />
-                        </div>
-                    </div>
-                </section>
+                    {/* Right Column: Order Summary (Sticky) */}
+                    <div className="lg:col-span-5 lg:sticky lg:top-24">
+                        <section className="bg-white/70 backdrop-blur-xl p-6 rounded-3xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                            <h2 className="text-lg font-bold text-slate-900 mb-6">Resumo do Pedido</h2>
 
-                {/* Forma de Pagamento */}
-                <section className="mb-6">
-                    <h2 className="text-[var(--text-primary)] font-bold text-lg mb-3">
-                        Forma de Pagamento
-                    </h2>
-                    <div className="space-y-3">
-                        {/* PIX */}
-                        <button
-                            onClick={() => setPaymentMethod('pix')}
-                            className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${paymentMethod === 'pix'
-                                ? 'border-[var(--accent-pink)] bg-pink-50'
-                                : 'border-[var(--border-light)] bg-white'
-                                }`}
-                        >
-                            <div className="w-12 h-12 bg-[var(--bg-secondary)] rounded-lg flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" className="text-[var(--accent-pink)]">
-                                    <path d="M235.33,116.72,139.28,20.66a16,16,0,0,0-22.57,0l-96,96.06a16,16,0,0,0,0,22.56l96.05,96.06h0a16,16,0,0,0,22.56,0l96.05-96.06A16,16,0,0,0,235.33,116.72ZM128,224,32,128,128,32l96,96Z" />
-                                </svg>
+                            <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar mb-6">
+                                {cartItems.map((item) => (
+                                    <div key={`${item.productId}-${item.size}`} className="flex gap-4 items-center">
+                                        <div className="w-16 h-20 bg-slate-100 rounded-lg bg-cover bg-center shrink-0" style={{ backgroundImage: `url("${item.product.images[0]}")` }} />
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-bold text-sm text-slate-900 truncate">{item.product.name}</p>
+                                            <p className="text-xs text-slate-500 mt-0.5">{item.quantity}x {item.size} • {item.color}</p>
+                                        </div>
+                                        <div className="font-bold text-sm text-slate-900">
+                                            R$ {(item.product.price * item.quantity).toFixed(2).replace('.', ',')}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                            <div className="flex-1 text-left">
-                                <p className="font-bold text-[var(--text-primary)]">PIX</p>
-                                <p className="text-sm text-[var(--text-secondary)]">Aprovação instantânea</p>
+
+                            <div className="space-y-3 pt-6 border-t border-slate-100">
+                                <div className="flex justify-between text-sm text-slate-500">
+                                    <span>Subtotal</span>
+                                    <span>R$ {subtotal.toFixed(2).replace('.', ',')}</span>
+                                </div>
+                                <div className="flex justify-between text-sm text-slate-500">
+                                    <span>Entrega</span>
+                                    <span className={shipping === 0 ? 'text-green-600 font-bold' : ''}>
+                                        {shipping === 0 ? 'Grátis' : `R$ ${shipping.toFixed(2).replace('.', ',')}`}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-baseline pt-4">
+                                    <span className="text-base font-bold text-slate-900">Total</span>
+                                    <span className="text-3xl font-black text-slate-900">
+                                        R$ {total.toFixed(2).replace('.', ',')}
+                                    </span>
+                                </div>
                             </div>
-                            <div className={`w-6 h-6 rounded-full border-2 ${paymentMethod === 'pix'
-                                ? 'border-[var(--accent-pink)] bg-[var(--accent-pink)]'
-                                : 'border-[var(--border-light)]'
-                                } flex items-center justify-center`}>
-                                {paymentMethod === 'pix' && (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="white" viewBox="0 0 256 256">
-                                        <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" />
-                                    </svg>
+
+                            <button
+                                onClick={handlePayment}
+                                disabled={step === 'processing'}
+                                className="w-full mt-8 h-14 bg-slate-900 text-white font-bold rounded-xl text-lg transition-all hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-xl shadow-slate-900/20 active:scale-[0.98]"
+                            >
+                                {step === 'processing' ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                                        Processando...
+                                    </>
+                                ) : (
+                                    `Pagar R$ ${total.toFixed(2).replace('.', ',')}`
                                 )}
-                            </div>
-                        </button>
-
-                        {/* Cartão de Crédito */}
-                        <button
-                            onClick={() => setPaymentMethod('credit_card')}
-                            className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${paymentMethod === 'credit_card'
-                                ? 'border-[var(--accent-pink)] bg-pink-50'
-                                : 'border-[var(--border-light)] bg-white'
-                                }`}
-                        >
-                            <div className="w-12 h-12 bg-[var(--bg-secondary)] rounded-lg flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" className="text-[var(--accent-pink)]">
-                                    <path d="M224,48H32A16,16,0,0,0,16,64V192a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V64A16,16,0,0,0,224,48Zm0,16V88H32V64ZM32,192V104H224v88Z" />
-                                </svg>
-                            </div>
-                            <div className="flex-1 text-left">
-                                <p className="font-bold text-[var(--text-primary)]">Cartão de Crédito</p>
-                                <p className="text-sm text-[var(--text-secondary)]">Até 12x sem juros</p>
-                            </div>
-                            <div className={`w-6 h-6 rounded-full border-2 ${paymentMethod === 'credit_card'
-                                ? 'border-[var(--accent-pink)] bg-[var(--accent-pink)]'
-                                : 'border-[var(--border-light)]'
-                                } flex items-center justify-center`}>
-                                {paymentMethod === 'credit_card' && (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="white" viewBox="0 0 256 256">
-                                        <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" />
-                                    </svg>
-                                )}
-                            </div>
-                        </button>
-
-                        {/* Boleto */}
-                        <button
-                            onClick={() => setPaymentMethod('boleto')}
-                            className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${paymentMethod === 'boleto'
-                                ? 'border-[var(--accent-pink)] bg-pink-50'
-                                : 'border-[var(--border-light)] bg-white'
-                                }`}
-                        >
-                            <div className="w-12 h-12 bg-[var(--bg-secondary)] rounded-lg flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" className="text-[var(--accent-pink)]">
-                                    <path d="M232,48V208a8,8,0,0,1-16,0V48a8,8,0,0,1,16,0ZM56,40a8,8,0,0,0-8,8V208a8,8,0,0,0,16,0V48A8,8,0,0,0,56,40Zm40,0a8,8,0,0,0-8,8V208a8,8,0,0,0,16,0V48A8,8,0,0,0,96,40Zm80,0a8,8,0,0,0-8,8V208a8,8,0,0,0,16,0V48A8,8,0,0,0,176,40Zm-40,0a8,8,0,0,0-8,8V208a8,8,0,0,0,16,0V48A8,8,0,0,0,136,40ZM16,40a8,8,0,0,0-8,8V208a8,8,0,0,0,16,0V48A8,8,0,0,0,16,40Z" />
-                                </svg>
-                            </div>
-                            <div className="flex-1 text-left">
-                                <p className="font-bold text-[var(--text-primary)]">Boleto</p>
-                                <p className="text-sm text-[var(--text-secondary)]">Vencimento em 3 dias</p>
-                            </div>
-                            <div className={`w-6 h-6 rounded-full border-2 ${paymentMethod === 'boleto'
-                                ? 'border-[var(--accent-pink)] bg-[var(--accent-pink)]'
-                                : 'border-[var(--border-light)]'
-                                } flex items-center justify-center`}>
-                                {paymentMethod === 'boleto' && (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="white" viewBox="0 0 256 256">
-                                        <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" />
-                                    </svg>
-                                )}
-                            </div>
-                        </button>
+                            </button>
+                        </section>
                     </div>
-                </section>
 
-                {/* Resumo do Pedido */}
-                <section>
-                    <h2 className="text-[var(--text-primary)] font-bold text-lg mb-3">
-                        Resumo do Pedido
-                    </h2>
-                    <div className="bg-white p-4 rounded-xl border border-[var(--border-light)] space-y-2">
-                        {cartItems.map((item) => (
-                            <div key={`${item.productId}-${item.size}-${item.color}`} className="flex justify-between text-sm">
-                                <span className="text-[var(--text-secondary)]">{item.quantity}x {item.product.name}</span>
-                                <span className="text-[var(--text-primary)]">
-                                    R$ {(item.product.price * item.quantity).toFixed(2).replace('.', ',')}
-                                </span>
-                            </div>
-                        ))}
-                        <div className="flex justify-between text-sm pt-2 border-t border-[var(--border-light)]">
-                            <span className="text-[var(--text-secondary)]">Frete</span>
-                            <span className={shipping === 0 ? 'text-green-600 font-medium' : 'text-[var(--text-primary)]'}>
-                                {shipping === 0 ? 'Grátis' : `R$ ${shipping.toFixed(2).replace('.', ',')}`}
-                            </span>
-                        </div>
-                        <div className="flex justify-between text-lg font-bold pt-2 border-t border-[var(--border-light)]">
-                            <span className="text-[var(--text-primary)]">Total</span>
-                            <span className="text-[var(--accent-pink)]">
-                                R$ {total.toFixed(2).replace('.', ',')}
-                            </span>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Badges de segurança */}
-                <div className="mt-6 flex items-center justify-center gap-4 text-xs text-[var(--text-secondary)]">
-                    <div className="flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256">
-                            <path d="M208,40H48A16,16,0,0,0,32,56V200a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40Zm0,160H48V56H208Z" />
-                        </svg>
-                        <span>Pagamento Seguro</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256">
-                            <path d="M208,40H48A16,16,0,0,0,32,56V200a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40Zm0,160H48V56H208Z" />
-                        </svg>
-                        <span>Dados Criptografados</span>
-                    </div>
                 </div>
             </main>
-
-            {/* Botão fixo */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[var(--border-light)] p-4">
-                <button
-                    onClick={handlePayment}
-                    disabled={step === 'processing'}
-                    className="w-full h-14 bg-[var(--accent-pink)] text-white font-bold rounded-lg text-lg transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                    {step === 'processing' ? (
-                        <>
-                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                            </svg>
-                            Processando...
-                        </>
-                    ) : (
-                        `Pagar R$ ${total.toFixed(2).replace('.', ',')}`
-                    )}
-                </button>
-                <div className="h-[env(safe-area-inset-bottom)]" />
-            </div>
         </div>
     );
 }

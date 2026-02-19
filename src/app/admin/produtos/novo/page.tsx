@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
+import { createProduct } from '@/services/product.service';
+import { ImageUpload } from '@/components/ImageUpload';
 
 export default function NovoProductPage() {
     const [images, setImages] = useState<string[]>([]);
@@ -19,18 +21,11 @@ export default function NovoProductPage() {
     const [saved, setSaved] = useState(false);
 
     const availableSizes = ['PP', 'P', 'M', 'G', 'GG', 'XG', '36', '38', '40', '42', '44', '46'];
-    const categories = ['Vestidos', 'Blusas', 'Calças', 'Saias', 'Acessórios'];
+    const categories = ['Vestidos', 'Blusas', 'Calças', 'Saias', 'Acessórios', 'Biquínis', 'Maiôs', 'Saídas de Praia'];
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        if (files) {
-            Array.from(files).forEach((file) => {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    setImages((prev) => [...prev, reader.result as string]);
-                };
-                reader.readAsDataURL(file);
-            });
+    const handleImageUploaded = (url: string) => {
+        if (url) {
+            setImages((prev) => [...prev, url]);
         }
     };
 
@@ -62,11 +57,44 @@ export default function NovoProductPage() {
         e.preventDefault();
         setIsSaving(true);
 
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        // Generate stock combinations
+        const stock = [];
+        if (formData.sizes.length > 0 && colors.length > 0) {
+            for (const size of formData.sizes) {
+                for (const color of colors) {
+                    stock.push({
+                        size,
+                        color: color.name,
+                        quantity: 10, // Default initial stock
+                    });
+                }
+            }
+        } else {
+            // Fallback if no size/color selected (e.g. accessories?)
+            stock.push({
+                size: 'UN',
+                color: 'Unique',
+                quantity: 10
+            });
+        }
+
+        const productData = {
+            name: formData.name,
+            description: formData.description,
+            price: parseFloat(formData.price),
+            category: formData.category,
+            images,
+            stock,
+        };
+
+        const result = await createProduct(productData);
 
         setIsSaving(false);
-        setSaved(true);
+        if (result) {
+            setSaved(true);
+        } else {
+            alert('Erro ao salvar produto. Tente novamente.');
+        }
     };
 
     if (saved) {
@@ -116,7 +144,7 @@ export default function NovoProductPage() {
                     <h2 className="text-[var(--text-primary)] font-bold text-lg mb-3">
                         Fotos do Produto
                     </h2>
-                    <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
+                    <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 items-start">
                         {images.map((img, index) => (
                             <div key={index} className="relative flex-shrink-0">
                                 <div
@@ -126,25 +154,16 @@ export default function NovoProductPage() {
                                 <button
                                     type="button"
                                     onClick={() => removeImage(index)}
-                                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
+                                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow-md z-10"
                                 >
                                     ✕
                                 </button>
                             </div>
                         ))}
-                        <label className="w-24 h-24 flex-shrink-0 border-2 border-dashed border-[var(--border-light)] rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-[var(--accent-pink)] transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" className="text-[var(--text-secondary)]">
-                                <path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z" />
-                            </svg>
-                            <span className="text-xs text-[var(--text-secondary)] mt-1">Adicionar</span>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={handleImageUpload}
-                                className="hidden"
-                            />
-                        </label>
+
+                        <div className="w-48 flex-shrink-0">
+                            <ImageUpload onUpload={handleImageUploaded} label="Adicionar Foto" />
+                        </div>
                     </div>
                 </section>
 
@@ -231,8 +250,8 @@ export default function NovoProductPage() {
                                 type="button"
                                 onClick={() => toggleSize(size)}
                                 className={`px-4 py-2 rounded-lg font-medium transition-all ${formData.sizes.includes(size)
-                                        ? 'bg-[var(--accent-pink)] text-white'
-                                        : 'bg-white border border-[var(--border-light)] text-[var(--text-primary)]'
+                                    ? 'bg-[var(--accent-pink)] text-white'
+                                    : 'bg-white border border-[var(--border-light)] text-[var(--text-primary)]'
                                     }`}
                             >
                                 {size}

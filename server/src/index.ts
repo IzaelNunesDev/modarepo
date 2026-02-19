@@ -5,6 +5,7 @@ import paymentRoutes from './routes/payment.routes';
 import webhookRoutes from './routes/webhook.routes';
 import uploadRoutes from './routes/upload.routes';
 import { shutdownWorkers } from './queues/payment.worker';
+import productRoutes from './routes/product.routes';
 
 // ============================================================
 // Moda Store — Backend Express
@@ -34,6 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 // ─── Rotas ────────────────────────────────────────────────────
 app.use('/api/payment', paymentRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/products', productRoutes);
 
 // ─── Health Check ─────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

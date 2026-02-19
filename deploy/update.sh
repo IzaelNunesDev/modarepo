@@ -18,7 +18,21 @@ cd "$PROJECT_DIR" || exit
 echo "📥 Puxando alterações do GitHub..."
 git pull origin master
 
-# 3. Rebuildar e Reiniciar Containers
+# 3. Configurar Certificados SSL (Self-Signed)
+echo "🔒 Verificando certificados SSL..."
+mkdir -p nginx/certs
+if [ ! -f "nginx/certs/self-signed.crt" ]; then
+    echo "⚠️ Certificado SSL não encontrado. Gerando um novo auto-assinado..."
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout nginx/certs/self-signed.key \
+        -out nginx/certs/self-signed.crt \
+        -subj "/C=BR/ST=Sao Paulo/L=Sao Paulo/O=ModaStore/OU=IT/CN=modastore.local"
+    echo "✅ Certificado gerado com sucesso!"
+else
+    echo "✅ Certificado SSL já existe."
+fi
+
+# 4. Rebuildar e Reiniciar Containers
 echo "🏗️ Rebuildando containers (Docker Compose)..."
 # Usamos --build para garantir que as alterações no código sejam compiladas
 # Usamos -d para rodar em background

@@ -1,30 +1,59 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { mockProducts } from '@/data/products';
+import { getProducts } from '@/services/product.service';
+import { Product } from '@/types';
 
 export default function AdminDashboard() {
-    // Calculate stats
-    const totalProducts = mockProducts.length;
-    const totalStock = mockProducts.reduce((sum, product) => {
-        return sum + Object.values(product.stock).reduce((a, b) => a + b, 0);
-    }, 0);
-    const lowStockProducts = mockProducts.filter((product) => {
-        const totalStock = Object.values(product.stock).reduce((a, b) => a + b, 0);
-        return totalStock < 10;
-    });
+    const [stats, setStats] = useState([
+        { label: 'Produtos', value: 0, icon: '📦', alert: false },
+        { label: 'Itens em Estoque', value: 0, icon: '🏷️', alert: false },
+        { label: 'Estoque Baixo', value: 0, icon: '⚠️', alert: false },
+    ]);
+    const [recentProducts, setRecentProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const stats = [
-        { label: 'Produtos', value: totalProducts, icon: '📦' },
-        { label: 'Itens em Estoque', value: totalStock, icon: '🏷️' },
-        { label: 'Estoque Baixo', value: lowStockProducts.length, icon: '⚠️', alert: lowStockProducts.length > 0 },
-    ];
+    useEffect(() => {
+        const loadData = async () => {
+            const products = await getProducts();
+
+            const totalProducts = products.length;
+            const totalStock = products.reduce((sum, product) => {
+                return sum + Object.values(product.stock).reduce((a, b) => a + b, 0);
+            }, 0);
+
+            const lowStockProducts = products.filter((product) => {
+                const stock = Object.values(product.stock).reduce((a, b) => a + b, 0);
+                return stock < 10;
+            });
+
+            setStats([
+                { label: 'Produtos', value: totalProducts, icon: '📦', alert: false },
+                { label: 'Itens em Estoque', value: totalStock, icon: '🏷️', alert: false },
+                { label: 'Estoque Baixo', value: lowStockProducts.length, icon: '⚠️', alert: lowStockProducts.length > 0 },
+            ]);
+
+            setRecentProducts(products.slice(0, 5));
+            setLoading(false);
+        };
+
+        loadData();
+    }, []);
 
     const quickActions = [
         { label: 'Adicionar Produto', href: '/admin/produtos/novo', icon: '➕' },
         { label: 'Ver Estoque', href: '/admin/estoque', icon: '📊' },
         { label: 'Ver Produtos', href: '/admin/produtos', icon: '👗' },
     ];
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -92,7 +121,7 @@ export default function AdminDashboard() {
                     Produtos Recentes
                 </h2>
                 <div className="space-y-3">
-                    {mockProducts.slice(0, 5).map((product) => {
+                    {recentProducts.map((product) => {
                         const stock = Object.values(product.stock).reduce((a, b) => a + b, 0);
                         return (
                             <Link
