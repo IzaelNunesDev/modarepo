@@ -45,12 +45,13 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: https://${PUBLIC_IP}
+        NEXT_PUBLIC_API_URL: https://${PUBLIC_IP}/api
     container_name: moda-frontend
     expose:
       - "3000"
     environment:
       - NODE_ENV=production
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
     restart: unless-stopped
     networks:
       - moda-network
@@ -65,6 +66,9 @@ services:
       - "3001"
     env_file:
       - .env.production
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
       redis:
         condition: service_healthy

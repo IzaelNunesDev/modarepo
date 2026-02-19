@@ -17,6 +17,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+RUN npx prisma generate
 RUN npm run build
 
 # ─── Stage 3: Runner ──────────────────────────────────────
@@ -30,7 +31,7 @@ RUN addgroup --system --gid 1001 appgroup
 RUN adduser --system --uid 1001 appuser
 
 # Copiar apenas prod dependencies + build output
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./
 

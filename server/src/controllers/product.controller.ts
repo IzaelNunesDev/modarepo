@@ -30,8 +30,13 @@ export const listProducts = async (req: Request, res: Response) => {
 export const getProduct = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
+
+        if (!id || typeof id !== 'string') {
+            return res.status(400).json({ error: 'Product ID is required' });
+        }
+
         const product = await prisma.product.findUnique({
-            where: { id },
+            where: { id: String(id) },
             include: {
                 stock: true,
                 images: true,
@@ -44,7 +49,7 @@ export const getProduct = async (req: Request, res: Response) => {
 
         const formattedProduct = {
             ...product,
-            images: product.images.map(img => img.url),
+            images: (product.images || []).map((img: any) => img.url),
         };
 
         res.json(formattedProduct);
@@ -96,6 +101,11 @@ export const createProduct = async (req: Request, res: Response) => {
 export const updateProduct = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
+
+        if (!id || typeof id !== 'string') {
+            return res.status(400).json({ error: 'Product ID is required' });
+        }
+
         const { name, description, price, category, images, stock } = req.body;
 
         const data: any = {};
@@ -123,7 +133,7 @@ export const updateProduct = async (req: Request, res: Response) => {
         }
 
         const product = await prisma.product.update({
-            where: { id },
+            where: { id: String(id) },
             data,
             include: {
                 images: true,
