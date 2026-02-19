@@ -32,7 +32,7 @@ export const paymentWorker = new Worker<PaymentJobData>(
             case 'payment_intent.succeeded': {
                 await enqueueOrderUpdate({
                     orderId,
-                    newStatus: 'paid',
+                    newStatus: 'PAID',
                     paymentIntentId,
                     paidAt: new Date().toISOString(),
                 });
@@ -44,7 +44,7 @@ export const paymentWorker = new Worker<PaymentJobData>(
             case 'payment_intent.payment_failed': {
                 await enqueueOrderUpdate({
                     orderId,
-                    newStatus: 'failed',
+                    newStatus: 'FAILED',
                     paymentIntentId,
                 });
                 await job.updateProgress(100);
@@ -55,7 +55,7 @@ export const paymentWorker = new Worker<PaymentJobData>(
             case 'payment_intent.canceled': {
                 await enqueueOrderUpdate({
                     orderId,
-                    newStatus: 'cancelled',
+                    newStatus: 'CANCELLED',
                     paymentIntentId,
                 });
                 await job.updateProgress(100);
@@ -66,7 +66,7 @@ export const paymentWorker = new Worker<PaymentJobData>(
             case 'charge.refunded': {
                 await enqueueOrderUpdate({
                     orderId,
-                    newStatus: 'refunded',
+                    newStatus: 'REFUNDED',
                     paymentIntentId,
                 });
                 await job.updateProgress(100);
@@ -77,7 +77,7 @@ export const paymentWorker = new Worker<PaymentJobData>(
             case 'checkout.session.completed': {
                 await enqueueOrderUpdate({
                     orderId,
-                    newStatus: 'processing',
+                    newStatus: 'PROCESSING',
                     paymentIntentId,
                 });
                 await job.updateProgress(100);

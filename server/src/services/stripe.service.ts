@@ -71,7 +71,7 @@ export class StripeService {
 
             return {
                 orderId: order.id,
-                status: 'processing',
+                status: 'PROCESSING',
                 paymentUrl: session.url || undefined,
             };
         } catch (error) {
@@ -113,7 +113,7 @@ export class StripeService {
 
             return {
                 orderId: order.id,
-                status: 'processing',
+                status: 'PROCESSING',
                 paymentUrl: undefined,
                 // O client_secret seria usado pelo Stripe.js no frontend
             };
@@ -185,7 +185,7 @@ export class StripeService {
 
         const base: CheckoutResponse = {
             orderId: order.id,
-            status: 'processing',
+            status: 'PROCESSING',
             expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
         };
 

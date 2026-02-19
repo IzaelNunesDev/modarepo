@@ -26,7 +26,7 @@ router.post('/', upload.single('file'), async (req: Request, res: Response): Pro
 
         console.log(`📤 Upload iniciado: ${filename} (${mimetype})`);
 
-        const publicUrl = await uploadFile(buffer, filename, mimetype);
+        const publicUrl = await uploadFile(buffer, filename);
 
         res.status(200).json({
             message: 'Upload concluído com sucesso!',

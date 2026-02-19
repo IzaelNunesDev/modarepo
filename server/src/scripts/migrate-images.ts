@@ -44,7 +44,7 @@ async function migrateImages() {
 
         try {
             console.log(`📤 Enviando: ${file}...`);
-            const publicUrl = await uploadFile(fileBuffer, file, mimeType);
+            const publicUrl = await uploadFile(fileBuffer, file);
             console.log(`✅ Sucesso: ${publicUrl}`);
 
             // Mapeia o caminho relativo antigo (ex: /imgs/foto.jpg) para a nova URL
