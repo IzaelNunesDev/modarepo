@@ -47,7 +47,7 @@ export async function createCheckout(req: Request, res: Response): Promise<void>
 
         // Verificar idempotência a nível de negócio
         console.log(`🔍 [Checkout] Verificando idempotência para chave: ${body.idempotencyKey}`);
-        const existingOrder = orderService.findByIdempotencyKey(body.idempotencyKey);
+        const existingOrder = await orderService.findByIdempotencyKey(body.idempotencyKey);
         if (existingOrder) {
             console.log(`🔄 [Checkout] Pedido duplicado detectado: ${existingOrder.id}`);
             res.status(200).json({
@@ -61,7 +61,7 @@ export async function createCheckout(req: Request, res: Response): Promise<void>
 
         // Criar o pedido
         console.log('📦 [Checkout] Criando pedido no OrderService...');
-        const order = orderService.createOrder(body);
+        const order = await orderService.createOrder(body);
 
         // Criar checkout no Stripe (ou simulação)
         console.log('💳 [Checkout] Iniciando sessão Stripe para pedido:', order.id);
@@ -69,10 +69,11 @@ export async function createCheckout(req: Request, res: Response): Promise<void>
 
         // Atualizar status do pedido
         console.log('📝 [Checkout] Atualizando status para processing:', order.id);
-        orderService.updateOrderStatus(order.id, 'processing');
+        await orderService.updateOrderStatus(order.id, 'processing');
 
         console.log('✅ [Checkout] Sucesso:', order.id);
         res.status(201).json(checkoutResponse);
+
     } catch (error) {
         console.error('💥 [Checkout] Erro FATAL:', error);
         res.status(500).json({
@@ -90,7 +91,7 @@ export async function createCheckout(req: Request, res: Response): Promise<void>
 export async function getOrderStatus(req: Request, res: Response): Promise<void> {
     try {
         const orderId = req.params.orderId as string;
-        const order = orderService.getOrder(orderId);
+        const order = await orderService.getOrder(orderId);
 
         if (!order) {
             res.status(404).json({ error: 'ORDER_NOT_FOUND', message: 'Pedido não encontrado.' });
@@ -120,11 +121,11 @@ export async function getOrderStatus(req: Request, res: Response): Promise<void>
  */
 export async function listOrders(req: Request, res: Response): Promise<void> {
     try {
-        const orders = orderService.listOrders();
+        const orders = await orderService.listOrders();
 
         res.json({
             total: orders.length,
-            orders: orders.map((o) => ({
+            orders: orders.map((o: any) => ({
                 id: o.id,
                 status: o.status,
                 paymentMethod: o.paymentMethod,
@@ -133,6 +134,8 @@ export async function listOrders(req: Request, res: Response): Promise<void> {
                 items: o.items.length,
                 createdAt: o.createdAt,
                 paidAt: o.paidAt,
+                customerName: o.customerName,
+                customerEmail: o.customerEmail,
             })),
         });
     } catch (error) {
@@ -168,7 +171,7 @@ export async function getQueueStatus(req: Request, res: Response): Promise<void>
 export async function simulatePaymentSuccess(req: Request, res: Response): Promise<void> {
     try {
         const orderId = req.params.orderId as string;
-        const order = orderService.getOrder(orderId);
+        const order = await orderService.getOrder(orderId);
 
         if (!order) {
             res.status(404).json({ error: 'ORDER_NOT_FOUND' });
@@ -176,7 +179,7 @@ export async function simulatePaymentSuccess(req: Request, res: Response): Promi
         }
 
         // Simular confirmação de pagamento
-        orderService.updateOrderStatus(orderId as string, 'paid', {
+        await orderService.updateOrderStatus(orderId as string, 'paid', {
             paymentIntentId: `pi_simulated_${Date.now()}`,
             paidAt: new Date(),
         });
@@ -204,7 +207,7 @@ export async function simulateWebhook(req: Request, res: Response): Promise<void
     try {
         const { orderId, eventType = 'payment_intent.succeeded' } = req.body;
 
-        const order = orderService.getOrder(orderId);
+        const order = await orderService.getOrder(orderId);
         if (!order) {
             res.status(404).json({ error: 'ORDER_NOT_FOUND' });
             return;

@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Product, CartItem } from '@/types';
-import { mockProducts } from '@/data/products';
 
 // ============================================================
 // Contexto Global do Carrinho
@@ -12,7 +11,7 @@ import { mockProducts } from '@/data/products';
 
 interface CartContextType {
     items: CartItem[];
-    addItem: (productId: string, size: string, color: string, quantity?: number) => void;
+    addItem: (product: Product, size: string, color: string, quantity?: number) => void;
     removeItem: (index: number) => void;
     updateQuantity: (index: number, delta: number) => void;
     clearCart: () => void;
@@ -27,14 +26,6 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 // Chave do localStorage
 const CART_STORAGE_KEY = 'moda-store-cart';
 
-// Tipo para armazenar no localStorage (sem o objeto Product completo)
-interface StoredCartItem {
-    productId: string;
-    size: string;
-    color: string;
-    quantity: number;
-}
-
 export function CartProvider({ children }: { children: ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -44,23 +35,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         try {
             const stored = localStorage.getItem(CART_STORAGE_KEY);
             if (stored) {
-                const storedItems: StoredCartItem[] = JSON.parse(stored);
-                // Reconstruir os items com os produtos completos
-                const reconstructed: CartItem[] = storedItems
-                    .map((si) => {
-                        const product = mockProducts.find((p) => p.id === si.productId);
-                        if (!product) return null;
-                        return {
-                            productId: si.productId,
-                            product,
-                            size: si.size,
-                            color: si.color,
-                            quantity: si.quantity,
-                        };
-                    })
-                    .filter((item): item is CartItem => item !== null);
-
-                setItems(reconstructed);
+                const storedItems: CartItem[] = JSON.parse(stored);
+                // Garantir que os produtos existem (validação básica)
+                const validItems = storedItems.filter(item => item.product && item.productId);
+                setItems(validItems);
             }
         } catch {
             // localStorage indisponível ou dados corrompidos
@@ -72,27 +50,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         if (!isLoaded) return;
         try {
-            const toStore: StoredCartItem[] = items.map((item) => ({
-                productId: item.productId,
-                size: item.size,
-                color: item.color,
-                quantity: item.quantity,
-            }));
-            localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(toStore));
+            localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
         } catch {
             // localStorage indisponível
         }
     }, [items, isLoaded]);
 
     // ─── Adicionar item ────────────────────────────────────────
-    const addItem = useCallback((productId: string, size: string, color: string, quantity: number = 1) => {
-        const product = mockProducts.find((p) => p.id === productId);
-        if (!product) return;
-
+    const addItem = useCallback((product: Product, size: string, color: string, quantity: number = 1) => {
         setItems((prev) => {
             // Verificar se já existe o mesmo produto+tamanho+cor
             const existingIndex = prev.findIndex(
-                (item) => item.productId === productId && item.size === size && item.color === color
+                (item) => item.productId === product.id && item.size === size && item.color === color
             );
 
             if (existingIndex >= 0) {
@@ -106,7 +75,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
             // Novo item
             return [...prev, {
-                productId,
+                productId: product.id,
                 product,
                 size,
                 color,
@@ -114,6 +83,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             }];
         });
     }, []);
+
 
     // ─── Remover item ──────────────────────────────────────────
     const removeItem = useCallback((index: number) => {

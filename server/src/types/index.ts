@@ -5,12 +5,13 @@
 export type PaymentMethod = 'pix' | 'credit_card' | 'boleto';
 
 export type OrderStatus =
-    | 'pending'        // Pedido criado, aguardando pagamento
-    | 'processing'     // Pagamento sendo processado
-    | 'paid'           // Pagamento confirmado
-    | 'failed'         // Pagamento falhou
-    | 'refunded'       // Pagamento estornado
-    | 'cancelled';     // Pedido cancelado
+    | 'PENDING'        // Pedido criado, aguardando pagamento
+    | 'PROCESSING'     // Pagamento sendo processado
+    | 'PAID'           // Pagamento confirmado
+    | 'FAILED'         // Pagamento falhou
+    | 'REFUNDED'       // Pagamento estornado
+    | 'CANCELLED'      // Pedido cancelado
+    | 'COMPLETED';     // Pedido concluído (entrega realizada)
 
 export interface OrderItem {
     productId: string;

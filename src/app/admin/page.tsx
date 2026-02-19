@@ -42,9 +42,10 @@ export default function AdminDashboard() {
     }, []);
 
     const quickActions = [
+        { label: 'Gerenciar Pedidos', href: '/admin/pedidos', icon: '🛍️' },
         { label: 'Adicionar Produto', href: '/admin/produtos/novo', icon: '➕' },
-        { label: 'Ver Estoque', href: '/admin/estoque', icon: '📊' },
-        { label: 'Ver Produtos', href: '/admin/produtos', icon: '👗' },
+        { label: 'Controle de Estoque', href: '/admin/estoque', icon: '📊' },
+        { label: 'Lista de Produtos', href: '/admin/produtos', icon: '👗' },
     ];
 
     if (loading) {

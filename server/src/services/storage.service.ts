@@ -2,55 +2,59 @@
 // ============================================================
 // Serviço de Upload (Compatível com S3 / Oracle Object Storage)
 // ============================================================
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
+import sharp from "sharp";
 
 dotenv.config();
 
 // Configuração do Cliente S3 (Apontando para Oracle Cloud)
 const s3Client = new S3Client({
-    region: process.env.ORACLE_REGION || "sa-saopaulo-1", // Ex: sa-saopaulo-1
-    endpoint: process.env.ORACLE_ENDPOINT, // URL do Namespace Oracle
+    region: process.env.ORACLE_REGION || "sa-saopaulo-1",
+    endpoint: process.env.ORACLE_ENDPOINT,
     credentials: {
         accessKeyId: process.env.ORACLE_ACCESS_KEY_ID || "",
         secretAccessKey: process.env.ORACLE_SECRET_ACCESS_KEY || "",
     },
-    forcePathStyle: true, // Necessário para alguns serviços compatíveis com S3
+    forcePathStyle: true,
 });
 
 const BUCKET_NAME = process.env.ORACLE_BUCKET_NAME || "imagens-site";
 
 /**
- * Faz upload de um arquivo para o Object Storage
- * @param fileBuffer Buffer do arquivo
- * @param fileName Nome original do arquivo (opcional)
- * @param mimeType Tipo MIME (ex: image/jpeg)
- * @returns URL pública do arquivo
+ * Otimiza a imagem usando sharp e faz upload para o Object Storage
  */
 export async function uploadFile(
     fileBuffer: Buffer,
-    fileName: string = "upload.jpg",
-    mimeType: string = "image/jpeg"
+    fileName: string = "upload.jpg"
 ): Promise<string> {
     try {
-        const fileExtension = fileName.split(".").pop();
-        const uniqueKey = `${uuidv4()}.${fileExtension}`;
+        // Otimização com Sharp
+        // 1. Redimensionar para no máximo 1080px de largura (mantendo proporção)
+        // 2. Converter para WebP para melhor compressão
+        // 3. Otimizar qualidade
+        const optimizedBuffer = await sharp(fileBuffer)
+            .resize({
+                width: 1080,
+                withoutEnlargement: true,
+                fit: 'inside'
+            })
+            .webp({ quality: 80 })
+            .toBuffer();
+
+        const uniqueKey = `${uuidv4()}.webp`;
 
         const command = new PutObjectCommand({
             Bucket: BUCKET_NAME,
             Key: uniqueKey,
-            Body: fileBuffer,
-            ContentType: mimeType,
-            ACL: "public-read", // Torna público se o bucket suportar
+            Body: optimizedBuffer,
+            ContentType: "image/webp",
+            ACL: "public-read",
         });
 
         await s3Client.send(command);
 
-        await s3Client.send(command);
-
-        // Use Native OCI URL format for public access
-        // https://objectstorage.{region}.oraclecloud.com/n/{namespace}/b/{bucket}/o/{object}
         const region = process.env.ORACLE_REGION || "sa-saopaulo-1";
         const namespace = process.env.ORACLE_NAMESPACE;
 
@@ -63,7 +67,32 @@ export async function uploadFile(
         return `https://objectstorage.${region}.oraclecloud.com/n/${namespace}/b/${BUCKET_NAME}/o/${uniqueKey}`;
 
     } catch (error) {
-        console.error("❌ Erro no upload para Oracle Object Storage:", error);
+        console.error("❌ Erro no processamento/upload de imagem:", error);
         throw new Error("Falha no upload de imagem");
+    }
+}
+
+/**
+ * Remove um arquivo do Object Storage pela sua URL ou Key
+ */
+export async function deleteFile(fileUrl: string): Promise<void> {
+    try {
+        // Extrair a key da URL
+        // Ex: https://.../o/meu-arquivo.webp -> meu-arquivo.webp
+        const parts = fileUrl.split("/o/");
+        const key = parts.length > 1 ? parts[parts.length - 1] : fileUrl.split("/").pop();
+
+        if (!key) return;
+
+        const command = new DeleteObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: key,
+        });
+
+        await s3Client.send(command);
+        console.log(`🗑️ [StorageService] Arquivo removido: ${key}`);
+    } catch (error) {
+        console.error("❌ Erro ao deletar arquivo do Oracle Cloud:", error);
+        // Não lançamos erro aqui para não travar o fluxo principal se a deleção falhar
     }
 }

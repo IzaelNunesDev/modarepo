@@ -112,17 +112,18 @@ export const orderUpdateWorker = new Worker<OrderUpdateJobData>(
 
         console.log(`\n📝 [OrderWorker] Atualizando pedido ${orderId} → ${newStatus}`);
 
-        const order = orderService.getOrder(orderId);
+        const order = await orderService.getOrder(orderId);
         if (!order) {
             throw new Error(`Pedido ${orderId} não encontrado. Será reprocessado.`);
         }
 
-        orderService.updateOrderStatus(orderId, newStatus, {
+        await orderService.updateOrderStatus(orderId, newStatus, {
             paymentIntentId,
             paidAt: paidAt ? new Date(paidAt) : undefined,
         });
 
         console.log(`✅ [OrderWorker] Pedido ${orderId} atualizado para: ${newStatus}`);
+
         return { orderId, newStatus, updated: true };
     },
     {
