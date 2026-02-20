@@ -17,6 +17,14 @@ cd "$PROJECT_DIR" || exit
 # 2. Arquivos já foram extraídos pelo GitHub Actions
 echo "📥 Código já atualizado via SCP pelo GitHub Actions."
 
+# Copiar .env.production para .env para que o docker compose o utilize
+if [ -f ".env.production" ]; then
+    echo "📄 Configurando variáveis de ambiente para produção..."
+    cp .env.production .env
+else
+    echo "⚠️ Arquivo .env.production não encontrado!"
+fi
+
 # 3. Configurar Certificados SSL (Self-Signed)
 echo "🔒 Verificando certificados SSL..."
 mkdir -p nginx/certs
