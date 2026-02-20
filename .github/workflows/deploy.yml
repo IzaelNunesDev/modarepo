@@ -13,6 +13,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Create project archive
+        run: tar -czf release.tar.gz --exclude=.git --exclude=node_modules .
+
+      - name: Copy files to server via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "release.tar.gz"
+          target: "/home/ubuntu/modarepo"
+
       - name: Deploy to Server via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -21,6 +33,12 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
+            cd /home/ubuntu/modarepo
+            
+            # Extrair os arquivos atuais no servidor sobrescrevendo
+            tar -xzf release.tar.gz
+            rm release.tar.gz
+            
             # Garante que o script tenha permissão de execução e o executa
-            chmod +x /home/ubuntu/modarepo/deploy/update.sh
-            /home/ubuntu/modarepo/deploy/update.sh
+            chmod +x deploy/update.sh
+            ./deploy/update.sh

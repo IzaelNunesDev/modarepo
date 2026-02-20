@@ -14,9 +14,8 @@ fi
 
 cd "$PROJECT_DIR" || exit
 
-# 2. Atualizar código fonte
-echo "📥 Puxando alterações do GitHub..."
-git pull origin master
+# 2. Arquivos já foram extraídos pelo GitHub Actions
+echo "📥 Código já atualizado via SCP pelo GitHub Actions."
 
 # 3. Configurar Certificados SSL (Self-Signed)
 echo "🔒 Verificando certificados SSL..."
