@@ -77,8 +77,18 @@ export async function handleStripeWebhook(req: Request, res: Response): Promise<
         }
 
         // ─── 3. Extrair dados do Payment Intent ───────────────────
-        const paymentIntentId = event.data.id || event.data.payment_intent;
-        const orderId = event.data.metadata?.orderId || 'unknown';
+        // Para checkout.session, payment_intent vem na propriedade payment_intent.
+        // Para payment_intent.*, o objeto base (id) é o próprio payment_intent.
+        const paymentIntentId = event.data.payment_intent || event.data.id;
+        const orderId = event.data.metadata?.orderId;
+
+        // Se o evento não possui um orderId em metadata, ignorar (provável evento mock ou sem relação)
+        if (!orderId) {
+            console.warn(`⚠️  [Webhook] Evento sem orderId no metadata: ${event.id}. Ignorando.`);
+            res.status(200).json({ received: true, ignored: true, reason: 'Missing orderId in metadata' });
+            return;
+        }
+
         const amount = event.data.amount || event.data.amount_total || 0;
         const status = event.data.status || 'unknown';
 

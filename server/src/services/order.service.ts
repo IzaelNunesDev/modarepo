@@ -13,7 +13,25 @@ export class OrderService {
     async createOrder(request: CreateCheckoutRequest): Promise<any> {
         const orderId = `ORD-${Date.now()}-${uuidv4().substring(0, 8).toUpperCase()}`;
 
-        const subtotalInCents = request.items.reduce(
+        // 🚨 CRÍTICO: Buscar os produtos no banco para garantir preços reais
+        const productIds = request.items.map(i => i.productId);
+        const dbProducts = await prisma.product.findMany({
+            where: { id: { in: productIds } }
+        });
+
+        const validatedItems = request.items.map(item => {
+            const dbProduct = dbProducts.find(p => p.id === item.productId);
+            if (!dbProduct) {
+                throw new Error(`Produto não encontrado: ${item.productId}`);
+            }
+            return {
+                ...item,
+                price: dbProduct.price, // Ignora o preço enviado pelo client
+                name: dbProduct.name    // Ignora o nome enviado pelo client
+            };
+        });
+
+        const subtotalInCents = validatedItems.reduce(
             (sum, item) => sum + Math.round(item.price * 100) * item.quantity,
             0
         );
@@ -32,7 +50,7 @@ export class OrderService {
                 shippingCost: shippingCostInCents,
                 total: totalInCents,
                 items: {
-                    create: request.items.map((item) => ({
+                    create: validatedItems.map((item) => ({
                         productId: item.productId,
                         name: item.name,
                         price: Math.round(item.price * 100),

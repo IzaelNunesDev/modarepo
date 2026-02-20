@@ -20,6 +20,9 @@ export const env = {
     // Frontend
     FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
 
+    // Autenticação
+    JWT_SECRET: process.env.JWT_SECRET || 'chave-secreta-padrao-apenas-para-desenvolvimento',
+
     // Validações
     get isProduction() {
         return this.NODE_ENV === 'production';

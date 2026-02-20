@@ -58,6 +58,12 @@ export class StripeService {
                     orderId: order.id,
                     idempotencyKey: order.idempotencyKey,
                 },
+                payment_intent_data: {
+                    metadata: {
+                        orderId: order.id,
+                        idempotencyKey: order.idempotencyKey,
+                    }
+                },
                 expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // Expira em 30 min
             };
 

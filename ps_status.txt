@@ -1,0 +1,6 @@
+NAME            IMAGE                COMMAND                  SERVICE    CREATED          STATUS                  PORTS
+moda-backend    modarepo-backend     "docker-entrypoint.s…"   backend    32 minutes ago   Up 32 minutes           3001/tcp
+moda-frontend   modarepo-frontend    "docker-entrypoint.s…"   frontend   32 minutes ago   Up 32 minutes           3000/tcp
+moda-nginx      nginx:alpine         "/docker-entrypoint.…"   nginx      10 hours ago     Up 10 hours             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp
+moda-postgres   postgres:15-alpine   "docker-entrypoint.s…"   postgres   10 hours ago     Up 10 hours             0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+moda-redis      redis:7-alpine       "docker-entrypoint.s…"   redis      11 hours ago     Up 11 hours (healthy)   6379/tcp

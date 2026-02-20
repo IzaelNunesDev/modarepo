@@ -170,6 +170,11 @@ export async function getQueueStatus(req: Request, res: Response): Promise<void>
  */
 export async function simulatePaymentSuccess(req: Request, res: Response): Promise<void> {
     try {
+        if (process.env.NODE_ENV === 'production') {
+            res.status(403).json({ error: 'FORBIDDEN', message: 'Simulação não permitida em ambiente de produção' });
+            return;
+        }
+
         const orderId = req.params.orderId as string;
         const order = await orderService.getOrder(orderId);
 
@@ -205,6 +210,11 @@ export async function simulatePaymentSuccess(req: Request, res: Response): Promi
  */
 export async function simulateWebhook(req: Request, res: Response): Promise<void> {
     try {
+        if (process.env.NODE_ENV === 'production') {
+            res.status(403).json({ error: 'FORBIDDEN', message: 'Simulação não permitida em ambiente de produção' });
+            return;
+        }
+
         const { orderId, eventType = 'payment_intent.succeeded' } = req.body;
 
         const order = await orderService.getOrder(orderId);

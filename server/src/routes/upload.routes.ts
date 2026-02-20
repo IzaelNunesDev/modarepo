@@ -2,8 +2,13 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import { uploadFile } from '../services/storage.service';
+import { verifyAdmin } from '../middleware/auth';
 
 const router = Router();
+
+// TODO(Segurança): Adicionar middleware de autenticação de ADMIN.
+// Rota perigosa (Qualquer pessoa pode lotar o Oracle Object Storage 
+// enviando megabytes infinitos sem autenticação via POST /api/upload).
 
 // Configura o multer para armazenar em memória (RAM) temporariamente
 const upload = multer({
@@ -13,7 +18,7 @@ const upload = multer({
     },
 });
 
-router.post('/', upload.single('file'), async (req: Request, res: Response): Promise<void> => {
+router.post('/', verifyAdmin(), upload.single('file'), async (req: Request, res: Response): Promise<void> => {
     try {
         if (!req.file) {
             res.status(400).json({ error: 'Nenhum arquivo enviado.' });

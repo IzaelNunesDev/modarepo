@@ -8,6 +8,7 @@ import {
     simulateWebhook,
 } from '../controllers/payment.controller';
 import { idempotencyMiddleware } from '../middleware/idempotency';
+import { verifyAdmin } from '../middleware/auth';
 
 const router = Router();
 
@@ -22,10 +23,10 @@ router.post('/checkout', idempotencyMiddleware(), createCheckout);
 router.get('/order/:orderId', getOrderStatus);
 
 // Listar todos os pedidos (admin)
-router.get('/orders', listOrders);
+router.get('/orders', verifyAdmin(), listOrders);
 
 // Status das filas (admin)
-router.get('/queue-status', getQueueStatus);
+router.get('/queue-status', verifyAdmin(), getQueueStatus);
 
 // Simulações (apenas desenvolvimento)
 router.post('/simulate-success/:orderId', simulatePaymentSuccess);
