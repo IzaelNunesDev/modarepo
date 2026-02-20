@@ -43,6 +43,10 @@ echo "🗄️ Executando migrações do banco de dados (Prisma)..."
 sleep 10
 docker compose exec -T backend npx prisma db push
 
+# 5. Reiniciar o Nginx
+echo "🔄 Reiniciando Nginx (para atualizar cache de IPs internos do Docker)..."
+docker compose restart nginx
+
 # 4. Limpeza (opcional)
 echo "🧹 Limpando imagens antigas..."
 docker image prune -f
