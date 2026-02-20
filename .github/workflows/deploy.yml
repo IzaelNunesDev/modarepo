@@ -14,7 +14,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Create project archive
-        run: tar -czf release.tar.gz --exclude=.git --exclude=node_modules --exclude=release.tar.gz .
+        run: |
+          tar -czf ../release.tar.gz --exclude=.git --exclude=node_modules .
+          mv ../release.tar.gz ./release.tar.gz
 
       - name: Copy files to server via SCP
         uses: appleboy/scp-action@v0.1.7
