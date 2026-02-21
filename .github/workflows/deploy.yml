@@ -41,7 +41,34 @@ jobs:
             # Extrair os arquivos atuais no servidor sobrescrevendo
             tar -xzf release.tar.gz
             rm release.tar.gz
+
+            # Exporta segredos para gerar .env.production no servidor
+            export PUBLIC_IP='${{ secrets.PUBLIC_IP }}'
+            export ORACLE_ACCESS_KEY_ID='${{ secrets.ORACLE_ACCESS_KEY_ID }}'
+            export ORACLE_SECRET_ACCESS_KEY='${{ secrets.ORACLE_SECRET_ACCESS_KEY }}'
+            export ORACLE_REGION='${{ secrets.ORACLE_REGION }}'
+            export ORACLE_BUCKET_NAME='${{ secrets.ORACLE_BUCKET_NAME }}'
+            export ORACLE_NAMESPACE='${{ secrets.ORACLE_NAMESPACE }}'
+            export ORACLE_ENDPOINT='${{ secrets.ORACLE_ENDPOINT }}'
+            export STRIPE_SECRET_KEY='${{ secrets.STRIPE_SECRET_KEY }}'
+            export STRIPE_WEBHOOK_SECRET='${{ secrets.STRIPE_WEBHOOK_SECRET }}'
+            export JWT_SECRET='${{ secrets.JWT_SECRET }}'
+            export DB_HOST='${{ secrets.DB_HOST }}'
+            export DB_PORT='${{ secrets.DB_PORT }}'
+            export DB_USER='${{ secrets.DB_USER }}'
+            export DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+            export DB_NAME='${{ secrets.DB_NAME }}'
+            export DATABASE_URL='${{ secrets.DATABASE_URL }}'
+            export REDIS_HOST='${{ secrets.REDIS_HOST }}'
+            export REDIS_PORT='${{ secrets.REDIS_PORT }}'
+            export API_URL='${{ secrets.API_URL }}'
+            export NEXT_PUBLIC_API_URL='${{ secrets.NEXT_PUBLIC_API_URL }}'
+            export FRONTEND_URL='${{ secrets.FRONTEND_URL }}'
             
+            # Gera .env.production com as variáveis de produção
+            chmod +x deploy/generate-env-production.sh
+            ./deploy/generate-env-production.sh /home/ubuntu/modarepo
+
             # Garante que o script tenha permissão de execução e o executa
             chmod +x deploy/update.sh
             ./deploy/update.sh

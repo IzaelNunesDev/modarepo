@@ -50,6 +50,10 @@ docker compose up -d
 echo "⏳ Aguardando containers ficarem prontos..."
 sleep 10
 
+# ─── Sync do banco ────────────────────────────────────────────
+echo "🗄️ Sincronizando schema do banco..."
+docker compose exec -T backend npx prisma db push --skip-generate
+
 # ─── Verificar status ────────────────────────────────────────
 echo ""
 echo "📊 Status dos containers:"

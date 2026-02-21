@@ -46,10 +46,10 @@ echo "🏗️ Rebuildando containers (Docker Compose)..."
 docker compose up -d --build
 
 # 4. Rodar Migrações do Banco de Dados
-echo "🗄️ Executando migrações do banco de dados (Prisma)..."
-# Aguarda o backend estar pronto (retry simples)
+echo "🗄️ Executando sync do banco (Prisma)..."
+# Em imagem de produção, evitar prisma generate (pode falhar por permissão)
 sleep 10
-docker compose exec -T backend npx prisma db push
+docker compose exec -T backend npx prisma db push --skip-generate
 
 # 5. Reiniciar o Nginx
 echo "🔄 Reiniciando Nginx (para atualizar cache de IPs internos do Docker)..."
