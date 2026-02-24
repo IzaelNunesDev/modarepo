@@ -31,6 +31,25 @@ export class OrderService {
             };
         });
 
+        // 🔒 Verificar estoque ANTES de criar o pedido
+        for (const item of validatedItems) {
+            const stockEntry = await prisma.productStock.findFirst({
+                where: {
+                    productId: item.productId,
+                    size: item.size,
+                    color: item.color,
+                },
+            });
+
+            if (!stockEntry || stockEntry.quantity < item.quantity) {
+                const available = stockEntry?.quantity ?? 0;
+                throw new Error(
+                    `Estoque insuficiente para "${item.name}" (${item.size}/${item.color}). ` +
+                    `Disponível: ${available}, Solicitado: ${item.quantity}`
+                );
+            }
+        }
+
         const subtotalInCents = validatedItems.reduce(
             (sum, item) => sum + Math.round(item.price * 100) * item.quantity,
             0
@@ -189,32 +208,32 @@ export class OrderService {
 
     /**
      * Abate a quantidade dos itens do pedido no estoque.
+     * Usa updateMany com condição WHERE quantity >= item.quantity para evitar estoque negativo.
      */
     private async deductStock(order: any): Promise<void> {
         console.log(`📉 [OrderService] Abatendo estoque para o pedido ${order.id}`);
 
         for (const item of order.items) {
             try {
-                const stockEntry = await prisma.productStock.findFirst({
+                // Atualiza APENAS se o estoque for suficiente (atomic check)
+                const result = await prisma.productStock.updateMany({
                     where: {
                         productId: item.productId,
                         size: item.size,
                         color: item.color,
+                        quantity: { gte: item.quantity }, // Só desconta se tiver estoque suficiente
+                    },
+                    data: {
+                        quantity: {
+                            decrement: item.quantity,
+                        },
                     },
                 });
 
-                if (stockEntry) {
-                    await prisma.productStock.update({
-                        where: { id: stockEntry.id },
-                        data: {
-                            quantity: {
-                                decrement: item.quantity,
-                            },
-                        },
-                    });
+                if (result.count > 0) {
                     console.log(`   ✅ Estoque atualizado: ${item.name} (${item.size}/${item.color}) -${item.quantity}`);
                 } else {
-                    console.warn(`   ⚠️ Registro de estoque não encontrado para: ${item.name} (${item.size}/${item.color})`);
+                    console.warn(`   ⚠️ Estoque insuficiente ou não encontrado para: ${item.name} (${item.size}/${item.color}). Descontagem não realizada.`);
                 }
             } catch (error) {
                 console.error(`   ❌ Erro ao atualizar estoque do item ${item.productId}:`, error);
@@ -223,12 +242,14 @@ export class OrderService {
     }
 
     /**
-     * Lista todos os pedidos (para debug/admin).
+     * Lista pedidos com paginação (para admin).
      */
-    async listOrders(): Promise<any[]> {
+    async listOrders(page: number = 1, limit: number = 50): Promise<any[]> {
         return prisma.order.findMany({
             orderBy: { createdAt: 'desc' },
             include: { items: true },
+            skip: (page - 1) * limit,
+            take: limit,
         });
     }
 

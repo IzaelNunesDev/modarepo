@@ -28,12 +28,35 @@ const updateProductSchema = productSchema.partial();
 
 export const listProducts = async (req: Request, res: Response) => {
     try {
-        const products = await prisma.product.findMany({
-            include: {
-                stock: true,
-                images: true,
-            },
-        });
+        const page = Math.max(1, parseInt(req.query.page as string) || 1);
+        const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 50));
+        const category = req.query.category as string | undefined;
+        const search = req.query.search as string | undefined;
+
+        const where: any = {};
+        if (category && category !== 'Todos') {
+            where.category = category;
+        }
+        if (search) {
+            where.OR = [
+                { name: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } },
+            ];
+        }
+
+        const [products, total] = await Promise.all([
+            prisma.product.findMany({
+                where,
+                include: {
+                    stock: true,
+                    images: true,
+                },
+                skip: (page - 1) * limit,
+                take: limit,
+                orderBy: { createdAt: 'desc' },
+            }),
+            prisma.product.count({ where }),
+        ]);
 
         const formattedProducts = products.map(product => ({
             ...product,
@@ -157,10 +180,10 @@ export const updateProduct = async (req: Request, res: Response) => {
         }
 
         const data: any = {};
-        if (name) data.name = name;
-        if (description) data.description = description;
-        if (price) data.price = price;
-        if (category) data.category = category;
+        if (name !== undefined) data.name = name;
+        if (description !== undefined) data.description = description;
+        if (price !== undefined) data.price = price;
+        if (category !== undefined) data.category = category;
 
         if (images) {
             data.images = {
@@ -202,11 +225,19 @@ export const deleteProduct = async (req: Request, res: Response) => {
 
         const product = await prisma.product.findUnique({
             where: { id },
-            include: { images: true }
+            include: { images: true, orderItems: true }
         });
 
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
+        }
+
+        // Verificar se o produto tem pedidos vinculados
+        if (product.orderItems.length > 0) {
+            return res.status(409).json({
+                error: 'PRODUCT_HAS_ORDERS',
+                message: `Não é possível excluir este produto pois ele está vinculado a ${product.orderItems.length} pedido(s). Considere desativá-lo.`
+            });
         }
 
         // 1. Apagar imagens do storage
@@ -216,7 +247,11 @@ export const deleteProduct = async (req: Request, res: Response) => {
             }
         }
 
-        // 2. Apagar do banco
+        // 2. Apagar registros dependentes primeiro (cascade manual)
+        await prisma.productImage.deleteMany({ where: { productId: id } });
+        await prisma.productStock.deleteMany({ where: { productId: id } });
+
+        // 3. Apagar o produto do banco
         await prisma.product.delete({
             where: { id }
         });

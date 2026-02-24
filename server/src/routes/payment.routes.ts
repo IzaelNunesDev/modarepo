@@ -28,8 +28,10 @@ router.get('/orders', verifyAdmin(), listOrders);
 // Status das filas (admin)
 router.get('/queue-status', verifyAdmin(), getQueueStatus);
 
-// Simulações (apenas desenvolvimento)
-router.post('/simulate-success/:orderId', simulatePaymentSuccess);
-router.post('/simulate-webhook', simulateWebhook);
+// Simulações (NÃO disponíveis em produção)
+if (process.env.NODE_ENV !== 'production') {
+    router.post('/simulate-success/:orderId', simulatePaymentSuccess);
+    router.post('/simulate-webhook', simulateWebhook);
+}
 
 export default router;

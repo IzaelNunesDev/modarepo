@@ -25,7 +25,7 @@ export default async function HomePage() {
       <section className="relative w-full h-[480px] rounded-b-[40px] overflow-hidden shadow-2xl">
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 hover:scale-105"
-          style={{ backgroundImage: `url('${featuresMethods[0]?.images[0] || ''}')` }}
+          style={{ backgroundImage: featuresMethods[0]?.images?.[0] ? `url('${featuresMethods[0].images[0]}')` : 'linear-gradient(135deg, #ff2a9d, #b537f2)' }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--text-primary)]/90 via-transparent to-transparent flex flex-col justify-end p-8 text-white pb-12">
           <div className="glass p-4 rounded-2xl backdrop-blur-md border border-white/20 inline-block mb-4 w-fit">
@@ -107,7 +107,7 @@ export default async function HomePage() {
               Frete Grátis
             </h3>
             <p className="text-white/80 text-sm md:text-lg font-medium mb-6 max-w-xs leading-relaxed">
-              Para todo o Brasil em compras acima de <span className="text-pink-400 font-bold">R$ 299,90</span>
+              Para todo o Brasil em compras acima de <span className="text-pink-400 font-bold">R$ 200,00</span>
             </p>
             <button className="bg-white text-slate-900 font-bold py-3 px-6 rounded-full w-fit hover:bg-pink-50 transition-all shadow-lg active:scale-95 text-sm md:text-base">
               Aproveitar Agora
@@ -128,7 +128,7 @@ export default async function HomePage() {
               <div className="relative aspect-[4/3] md:aspect-auto md:h-full bg-slate-100 rounded-3xl overflow-hidden group">
                 <div
                   className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                  style={{ backgroundImage: `url("${hotItems[0].images[0]}")` }}
+                  style={{ backgroundImage: hotItems[0]?.images?.[0] ? `url("${hotItems[0].images[0]}")` : 'linear-gradient(135deg, #ff2a9d, #b537f2)' }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6 md:p-8 text-white">
                   <h3 className="text-2xl font-bold mb-1">{hotItems[0].name}</h3>

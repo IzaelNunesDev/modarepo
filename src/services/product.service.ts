@@ -68,8 +68,7 @@ function transformProduct(backendProduct: BackendProduct): Product {
 export async function getProducts(): Promise<Product[]> {
     try {
         const res = await fetch(`${API_URL}/products`, {
-            cache: 'no-store', // Always fetch fresh data
-            next: { revalidate: 0 }
+            next: { revalidate: 60 } // ISR: cacheia por 60s, depois revalida em background
         });
 
         if (!res.ok) {
@@ -87,8 +86,7 @@ export async function getProducts(): Promise<Product[]> {
 export async function getProduct(id: string): Promise<Product | null> {
     try {
         const res = await fetch(`${API_URL}/products/${id}`, {
-            cache: 'no-store',
-            next: { revalidate: 0 }
+            next: { revalidate: 60 } // ISR: cacheia por 60s
         });
 
         if (!res.ok) {

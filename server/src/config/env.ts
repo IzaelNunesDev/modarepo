@@ -3,6 +3,13 @@ import path from 'path';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
+// Validação crítica: JWT_SECRET DEVE existir em produção
+const jwtSecret = process.env.JWT_SECRET || 'chave-secreta-padrao-apenas-para-desenvolvimento';
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+    console.error('🚨 FATAL: JWT_SECRET não configurado em produção! O servidor NÃO vai iniciar.');
+    process.exit(1);
+}
+
 export const env = {
     // Stripe
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || '',
@@ -21,7 +28,7 @@ export const env = {
     FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
 
     // Autenticação
-    JWT_SECRET: process.env.JWT_SECRET || 'chave-secreta-padrao-apenas-para-desenvolvimento',
+    JWT_SECRET: jwtSecret,
 
     // Validações
     get isProduction() {
