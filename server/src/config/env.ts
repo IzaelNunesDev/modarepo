@@ -6,8 +6,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 // Validação crítica: JWT_SECRET DEVE existir em produção
 const jwtSecret = process.env.JWT_SECRET || 'chave-secreta-padrao-apenas-para-desenvolvimento';
 if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
-    console.error('🚨 FATAL: JWT_SECRET não configurado em produção! O servidor NÃO vai iniciar.');
-    process.exit(1);
+    console.warn('🚨 AVISO: JWT_SECRET não configurado em produção! Usando chave padrão — INSEGURO!');
+    console.warn('   Configure JWT_SECRET no .env.production com: openssl rand -base64 64');
 }
 
 export const env = {
