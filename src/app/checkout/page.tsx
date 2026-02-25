@@ -29,7 +29,8 @@ interface OrderStatus {
     paidAt?: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = BASE_URL.endsWith('/api') ? BASE_URL : `${BASE_URL.replace(/\/$/, '')}/api`;
 
 function generateIdempotencyKey(): string {
     return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
@@ -75,7 +76,7 @@ export default function CheckoutPage() {
     // ─── Polling para verificar status do pagamento ────────────
     const pollOrderStatus = useCallback(async (orderId: string) => {
         try {
-            const res = await fetch(`${API_URL}/api/payment/order/${orderId}`);
+            const res = await fetch(`${API_URL}/payment/order/${orderId}`);
             if (!res.ok) return;
             const data: OrderStatus = await res.json();
             setOrderStatus(data);
@@ -116,7 +117,7 @@ export default function CheckoutPage() {
         setStep('processing');
 
         try {
-            const response = await fetch(`${API_URL}/api/payment/checkout`, {
+            const response = await fetch(`${API_URL}/payment/checkout`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -161,7 +162,7 @@ export default function CheckoutPage() {
         if (!checkoutResult?.orderId) return;
 
         try {
-            const res = await fetch(`${API_URL}/api/payment/simulate-success/${checkoutResult.orderId}`, {
+            const res = await fetch(`${API_URL}/payment/simulate-success/${checkoutResult.orderId}`, {
                 method: 'POST',
             });
 
@@ -231,7 +232,7 @@ export default function CheckoutPage() {
                         </button>
                         {checkoutResult && (
                             <button
-                                onClick={() => window.open(`${API_URL}/api/payment/order/${checkoutResult.orderId}`, '_blank')}
+                                onClick={() => window.open(`${API_URL}/payment/order/${checkoutResult.orderId}`, '_blank')}
                                 className="w-full py-4 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl transition-all hover:bg-slate-50 active:scale-95"
                             >
                                 Ver Detalhes
